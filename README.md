@@ -154,19 +154,9 @@ src/app/
 - FluentValidation
 - JWT Authentication
 
-### DevOps
-
-- Docker
-- GitHub Actions
-- Nginx
-- Azure / DigitalOcean
-
 ### AI Integration
 
-- OpenAI API
-- Prompt Engineering
-- AI Productivity Analysis
-- Intelligent Workflow Assistance
+- still didn't figure it out
 
 ---
 
