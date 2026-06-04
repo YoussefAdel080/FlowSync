@@ -1,0 +1,6 @@
+@FlowSync_HostAddress = http://localhost:5236
+
+GET {{FlowSync_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
