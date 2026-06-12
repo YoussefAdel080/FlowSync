@@ -24,5 +24,13 @@ namespace FlowSync.Application.Repositories
 
             return result.Count != 0;
         }
+
+        public async Task<User?> GetUserByEmailAsync(string email, CancellationToken token)
+        {
+            var result = await _context.Users
+                .FirstOrDefaultAsync(user => user.Email == email, token);
+
+            return result;
+        }
     }
 }

@@ -1,5 +1,9 @@
 using FlowSync.Application;
+using FlowSync.Application.Configuration;
 using FlowSync.Mapping;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,12 +38,58 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+// auth registration
+var jwtSection = builder.Configuration.GetSection("Jwt");
+
+var key = jwtSection["Key"]
+    ?? throw new InvalidOperationException("Jwt:Key is not configured.");
+
+var issuer = jwtSection["Issuer"]
+    ?? throw new InvalidOperationException("Jwt:Issuer is not configured.");
+
+var audience = jwtSection["Audience"]
+    ?? throw new InvalidOperationException("Jwt:Audience is not configured.");
+
+builder.Services
+    .AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.RequireHttpsMetadata = true;
+        options.SaveToken = false;
+
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(key)),
+
+            ValidateIssuer = true,
+            ValidIssuer = issuer,
+
+            ValidateAudience = true,
+            ValidAudience = audience,
+
+            ValidateLifetime = true,
+
+            ClockSkew = TimeSpan.Zero
+        };
+    });
+
+builder.Services.Configure<JwtOptions>(
+    builder.Configuration.GetSection("Jwt"));
+
 // Add services to the container.
 builder.Services.AddControllers();
 
 builder.Services.AddApplication();
 builder.Services.AddDbContext(builder.Configuration);
 builder.Services.AddEndpointsApiExplorer();
+
 
 var app = builder.Build();
 
@@ -52,6 +102,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

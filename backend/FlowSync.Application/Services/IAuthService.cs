@@ -1,9 +1,12 @@
 ﻿using FlowSync.Application.Models;
+using FlowSync.Contracts.Requests;
+using FlowSync.Contracts.Responses;
 
 namespace FlowSync.Application.Services
 {
     public interface IAuthService
     {
         Task<bool> Register(User user, CancellationToken token);
+        Task<LoginResponseData> Login(LoginRequest request, CancellationToken token);
     }
 }

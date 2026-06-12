@@ -19,6 +19,7 @@ namespace FlowSync.Application
             services.AddScoped<IAuthService, AuthService>();
             services.AddValidatorsFromAssemblyContaining<IApplicationMarker>(ServiceLifetime.Scoped);
             services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+            services.AddScoped<ITokenService, TokenService>();
             return services;
         }
 
