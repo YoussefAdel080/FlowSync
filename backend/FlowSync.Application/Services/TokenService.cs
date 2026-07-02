@@ -1,21 +1,25 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using FlowSync.Application.Configuration;
+using FlowSync.Application.Models;
+using FlowSync.Application.Repositories;
+using FlowSync.Contracts.Responses;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using FlowSync.Application.Configuration;
-using FlowSync.Application.Models;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 
 namespace FlowSync.Application.Services;
 
 public class TokenService : ITokenService
 {
+    private readonly ITokenRepository _refreshTokenRepository;
     private readonly JwtOptions _jwtOptions;
 
-    public TokenService(IOptions<JwtOptions> options)
+    public TokenService(IOptions<JwtOptions> options, ITokenRepository refreshTokenRepository)
     {
         _jwtOptions = options.Value;
+        _refreshTokenRepository = refreshTokenRepository;
     }
 
     public (string Token, DateTime Expiration) GenerateAccessToken(User user)
@@ -71,5 +75,54 @@ public class TokenService : ITokenService
                 RandomNumberGenerator.GetBytes(64));
 
         return (refreshToken, expiration);
+    }
+
+    public async Task<bool> SaveRefreshTokenAsync(Guid userId, string token, DateTime expiresAt, CancellationToken cancellationToken)
+    {
+          var refreshToken = new RefreshToken
+          {
+              UserId = userId,
+              Token = token,
+              ExpiresAt = expiresAt,
+              CreatedAt = DateTime.UtcNow
+          };
+
+          return await _refreshTokenRepository.SaveRefreshTokenAsync(refreshToken, cancellationToken);
+    }
+
+    public async Task<RefreshToken?> GetRefreshTokenAsync(string token, CancellationToken cancellationToken)
+    {
+        var refreshToken = await _refreshTokenRepository.GetRefreshTokenAsync(token, cancellationToken);
+        return refreshToken;
+    }
+
+    public async Task<LoginResponseData?> RefreshTokenAsync(string token, CancellationToken cancellationToken)
+    {
+        var newRefreshTokenValue = GenerateRefreshToken();
+
+        var newRefreshTokenEntity = new RefreshToken
+        {
+            Token = newRefreshTokenValue.Token,
+            ExpiresAt = newRefreshTokenValue.Expiration,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        var oldToken = await _refreshTokenRepository.RotateRefreshTokenAsync(
+            token,
+            newRefreshTokenEntity,
+            cancellationToken);
+
+        if (oldToken?.User is null)
+            return null;
+
+        var newAccessToken = GenerateAccessToken(oldToken.User);
+
+        return new LoginResponseData
+        {
+            AccessToken = newAccessToken.Token,
+            AccessTokenExpiry = newAccessToken.Expiration,
+            RefreshToken = newRefreshTokenValue.Token,
+            RefreshTokenExpiry = newRefreshTokenValue.Expiration
+        };
     }
 }

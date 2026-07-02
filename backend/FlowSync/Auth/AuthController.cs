@@ -48,5 +48,20 @@ namespace FlowSync.Controllers
             );
         }
 
+        [HttpPost($"{ApiEndpoints.Auth.Refresh}")]
+        public async Task<IActionResult> Refresh([FromBody] Contracts.Requests.RefreshRequest command, CancellationToken token)
+        {
+            var result = await _authService.Refresh(command, token);
+
+            return Ok(
+                new LoginResponse
+                {
+                    Success = true,
+                    Message = "Refresh successful.",
+                    Data = result
+                }
+            );
+        }
+
     }
 }

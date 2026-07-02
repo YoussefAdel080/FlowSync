@@ -16,6 +16,7 @@ namespace FlowSync.Application
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
             services.AddScoped<IAuthRepository, AuthRepository>();
+            services.AddScoped<ITokenRepository, TokenRepository>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddValidatorsFromAssemblyContaining<IApplicationMarker>(ServiceLifetime.Scoped);
             services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
