@@ -9,5 +9,6 @@ namespace FlowSync.Application.Services
         Task<bool> Register(User user, CancellationToken token);
         Task<LoginResponseData> Login(LoginRequest request, CancellationToken token);
         Task<LoginResponseData?> Refresh(RefreshRequest request, CancellationToken token);
+        Task<bool> Logout(LogoutRequest request, CancellationToken cancellationToken);
     }
 }

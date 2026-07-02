@@ -11,6 +11,7 @@
             public const string Register = $"{Base}/Register";
             public const string Login = $"{Base}/Login";
             public const string Refresh = $"{Base}/Refresh";
+            public const string Logout = $"{Base}/Logout";
         }
     }
 }

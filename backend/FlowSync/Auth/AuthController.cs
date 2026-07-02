@@ -18,7 +18,7 @@ namespace FlowSync.Controllers
         }
 
         [HttpPost($"{ApiEndpoints.Auth.Register}")]
-        public async Task<IActionResult> Register([FromBody] Contracts.Requests.RegisterRequest command, CancellationToken token)
+        public async Task<IActionResult> Register([FromBody] RegisterRequest command, CancellationToken token)
         {
             var user = command.MapToUser();
 
@@ -34,7 +34,7 @@ namespace FlowSync.Controllers
         }
 
         [HttpPost($"{ApiEndpoints.Auth.Login}")]
-        public async Task<IActionResult> Login([FromBody] Contracts.Requests.LoginRequest command, CancellationToken token)
+        public async Task<IActionResult> Login([FromBody] LoginRequest command, CancellationToken token)
         {
             var result = await _authService.Login(command, token);
 
@@ -49,7 +49,7 @@ namespace FlowSync.Controllers
         }
 
         [HttpPost($"{ApiEndpoints.Auth.Refresh}")]
-        public async Task<IActionResult> Refresh([FromBody] Contracts.Requests.RefreshRequest command, CancellationToken token)
+        public async Task<IActionResult> Refresh([FromBody] RefreshRequest command, CancellationToken token)
         {
             var result = await _authService.Refresh(command, token);
 
@@ -63,5 +63,18 @@ namespace FlowSync.Controllers
             );
         }
 
+        [HttpPost($"{ApiEndpoints.Auth.Logout}")]
+        public async Task<IActionResult> Logout([FromBody] LogoutRequest command, CancellationToken token)
+        {
+            var result = await _authService.Logout(command, token);
+            return Ok(
+                new BaseResponse<bool>
+                {
+                    Success = true,
+                    Message = "Logout successful.",
+                    Data = true
+                }
+            );
+        }
     }
 }

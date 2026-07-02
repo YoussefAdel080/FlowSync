@@ -15,8 +15,9 @@ namespace FlowSync.Application.Services
         private readonly IValidator<User> _validator;
         private readonly IValidator<LoginRequest> _loginValidator;
         private readonly IValidator<RefreshRequest> _refreshValidator;
+        private readonly IValidator<LogoutRequest> _logoutValidator;
 
-        public AuthService(IAuthRepository authRepository, IValidator<User> validator, IPasswordHasher<User> passwordHasher, IValidator<LoginRequest> loginValidator, ITokenService tokenService, IValidator<RefreshRequest> refreshValidator)
+        public AuthService(IAuthRepository authRepository, IValidator<User> validator, IPasswordHasher<User> passwordHasher, IValidator<LoginRequest> loginValidator, ITokenService tokenService, IValidator<RefreshRequest> refreshValidator, IValidator<LogoutRequest> logoutValidator)
         {
             _authRepository = authRepository;
             _validator = validator;
@@ -24,6 +25,7 @@ namespace FlowSync.Application.Services
             _loginValidator = loginValidator;
             _tokenService = tokenService;
             _refreshValidator = refreshValidator;
+            _logoutValidator = logoutValidator;
         }
 
         public async Task<bool> Register(User user, CancellationToken token)
@@ -85,6 +87,13 @@ namespace FlowSync.Application.Services
             await _refreshValidator.ValidateAndThrowAsync(request);
 
             return await _tokenService.RefreshTokenAsync(request.RefreshToken, token);
+        }
+
+        public async Task<bool> Logout(LogoutRequest request, CancellationToken cancellationToken)
+        {
+            await _logoutValidator.ValidateAndThrowAsync(request);
+
+            return await _tokenService.LogoutAsync(request.RefreshToken, cancellationToken);
         }
     }
 }

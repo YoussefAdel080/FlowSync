@@ -125,4 +125,9 @@ public class TokenService : ITokenService
             RefreshTokenExpiry = newRefreshTokenValue.Expiration
         };
     }
+
+    public async Task<bool> LogoutAsync(string token, CancellationToken cancellationToken)
+    {
+        return await _refreshTokenRepository.RevokeRefreshTokenAsync(token, cancellationToken);
+    }
 }

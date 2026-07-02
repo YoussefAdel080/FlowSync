@@ -10,5 +10,6 @@ namespace FlowSync.Application.Repositories
         Task<bool> RefreshTokenExpiredAsync(string token, CancellationToken cancellationToken);
         Task<RefreshToken?> GetRefreshTokenAsync(string token, CancellationToken cancellationToken);
         Task<RefreshToken?> RotateRefreshTokenAsync(string oldToken, RefreshToken newRefreshToken, CancellationToken cancellationToken);
+        Task<bool> RevokeRefreshTokenAsync(string token, CancellationToken cancellationToken);
     }
 }

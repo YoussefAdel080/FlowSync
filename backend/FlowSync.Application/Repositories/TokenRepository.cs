@@ -66,5 +66,16 @@ namespace FlowSync.Application.Repositories
 
             return existingToken;
         }
+
+        public async Task<bool> RevokeRefreshTokenAsync(string token, CancellationToken cancellationToken)
+        {
+            var refreshToken = await _context.RefreshTokens.FirstOrDefaultAsync(rt => rt.Token == token, cancellationToken);
+            if (refreshToken is null || refreshToken.IsRevoked || refreshToken.IsExpired)
+                return true;
+            refreshToken.IsRevoked = true;
+            refreshToken.RevokedAt = DateTime.UtcNow;
+            var result = await _context.SaveChangesAsync(cancellationToken);
+            return result > 0;
+        }
     }
 }
