@@ -3,6 +3,7 @@ using FlowSync.Application.Repositories;
 using FlowSync.Contracts.Requests;
 using FlowSync.Contracts.Responses;
 using FluentValidation;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 
 namespace FlowSync.Application.Services
@@ -16,8 +17,9 @@ namespace FlowSync.Application.Services
         private readonly IValidator<LoginRequest> _loginValidator;
         private readonly IValidator<RefreshRequest> _refreshValidator;
         private readonly IValidator<LogoutRequest> _logoutValidator;
+        private readonly IValidator<UpdateProfileRequest> _updateProfileValidator;
 
-        public AuthService(IAuthRepository authRepository, IValidator<User> validator, IPasswordHasher<User> passwordHasher, IValidator<LoginRequest> loginValidator, ITokenService tokenService, IValidator<RefreshRequest> refreshValidator, IValidator<LogoutRequest> logoutValidator)
+        public AuthService(IAuthRepository authRepository, IValidator<User> validator, IPasswordHasher<User> passwordHasher, IValidator<LoginRequest> loginValidator, ITokenService tokenService, IValidator<RefreshRequest> refreshValidator, IValidator<LogoutRequest> logoutValidator, IValidator<UpdateProfileRequest> updateProfileValidator)
         {
             _authRepository = authRepository;
             _validator = validator;
@@ -26,6 +28,7 @@ namespace FlowSync.Application.Services
             _tokenService = tokenService;
             _refreshValidator = refreshValidator;
             _logoutValidator = logoutValidator;
+            _updateProfileValidator = updateProfileValidator;
         }
 
         public async Task<bool> Register(User user, CancellationToken token)
@@ -61,7 +64,8 @@ namespace FlowSync.Application.Services
 
             (string Token, DateTime Expiration)? refreshToken = null;
 
-            if (request.RememberMe){ 
+            if (request.RememberMe)
+            {
                 refreshToken = _tokenService.GenerateRefreshToken();
 
                 // save refreshToken
@@ -94,6 +98,37 @@ namespace FlowSync.Application.Services
             await _logoutValidator.ValidateAndThrowAsync(request);
 
             return await _tokenService.LogoutAsync(request.RefreshToken, cancellationToken);
+        }
+
+        public async Task<GetProfileResponse?> GetProfile(Guid userId, CancellationToken cancellationToken)
+        {
+            var user = await _authRepository.GetUserByIdAsync(userId, cancellationToken);
+
+            if (user is null)
+            {
+                return null;
+            }
+
+            return new GetProfileResponse
+            {
+                Id = user.Id,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+            };
+        }
+
+        public async Task<bool> UpdateProfile(Guid userId,UpdateProfileRequest request, CancellationToken cancellationToken)
+        {
+            var user = await _authRepository.GetUserByIdAsync(userId, cancellationToken);
+
+            if (user is null)
+            {
+                return false;
+            }
+            await _updateProfileValidator.ValidateAndThrowAsync(request);
+
+            return await _authRepository.UpdateUserProfileAsync(user ,request, cancellationToken);
         }
     }
 }

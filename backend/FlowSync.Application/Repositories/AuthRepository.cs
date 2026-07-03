@@ -1,6 +1,8 @@
 ﻿using FlowSync.Application.Contexts;
 using FlowSync.Application.Models;
+using FlowSync.Contracts.Requests;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace FlowSync.Application.Repositories
 {
@@ -31,6 +33,23 @@ namespace FlowSync.Application.Repositories
                 .FirstOrDefaultAsync(user => user.Email == email, token);
 
             return result;
+        }
+
+        public async Task<User?> GetUserByIdAsync(Guid id, CancellationToken token)
+        {
+            var result = await _context.Users
+                .FirstOrDefaultAsync(user => user.Id == id, token);
+
+            return result;
+        }
+
+        public async Task<bool> UpdateUserProfileAsync(User user,UpdateProfileRequest request, CancellationToken token)
+        {
+            user.FirstName = request.FirstName;
+            user.LastName = request.LastName;
+
+            await _context.SaveChangesAsync(token);
+            return true;
         }
     }
 }

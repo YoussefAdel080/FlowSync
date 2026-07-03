@@ -10,5 +10,7 @@ namespace FlowSync.Application.Services
         Task<LoginResponseData> Login(LoginRequest request, CancellationToken token);
         Task<LoginResponseData?> Refresh(RefreshRequest request, CancellationToken token);
         Task<bool> Logout(LogoutRequest request, CancellationToken cancellationToken);
+        Task<GetProfileResponse?> GetProfile(Guid userId,CancellationToken cancellationToken);
+        Task<bool> UpdateProfile(Guid userId, UpdateProfileRequest requset,CancellationToken cancellationToken);
     }
 }

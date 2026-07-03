@@ -1,8 +1,10 @@
 ﻿using FlowSync.Application.Models;
 using FlowSync.Application.Services;
+using FlowSync.Auth;
 using FlowSync.Contracts.Requests;
 using FlowSync.Contracts.Responses;
 using FlowSync.Mapping;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlowSync.Controllers
@@ -75,6 +77,59 @@ namespace FlowSync.Controllers
                     Data = true
                 }
             );
+        }
+
+        [Authorize]
+        [HttpGet($"{ApiEndpoints.Auth.Profile}")]
+        public async Task<IActionResult> GetProfile(CancellationToken token)
+        {
+            var userId = HttpContext.GetUserId();
+            if (userId is null)
+            {
+                return Unauthorized();
+            }
+            var result = await _authService.GetProfile(userId.Value, token);
+            if (result == null)
+            {
+                return NotFound(new BaseResponse<object>
+                {
+                    Success = false,
+                    Message = "User not found.",
+                    Data = null
+                });
+            }
+            return Ok(new BaseResponse<GetProfileResponse> {
+                Success = true,
+                Message = "Profile retrieved successfully.",
+                Data = result
+            });
+        }
+
+        [Authorize]
+        [HttpPut($"{ApiEndpoints.Auth.Profile}")]
+        public async Task<IActionResult> PutProfile([FromBody] UpdateProfileRequest request, CancellationToken token)
+        {
+            var userId = HttpContext.GetUserId();
+            if(userId is null)
+            {
+                return Unauthorized();
+            }
+            var result = await _authService.UpdateProfile(userId.Value, request, token);
+            if (!result)
+            {
+                return NotFound(new BaseResponse<object>
+                {
+                    Success = false,
+                    Message = "User not found.",
+                    Data = null
+                });
+            }
+            return Ok(new BaseResponse<bool>
+            {
+                Success = true,
+                Message = "Profile updated successfully.",
+                Data = true
+            });
         }
     }
 }

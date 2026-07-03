@@ -12,6 +12,7 @@
             public const string Login = $"{Base}/Login";
             public const string Refresh = $"{Base}/Refresh";
             public const string Logout = $"{Base}/Logout";
+            public const string Profile = $"{Base}/Profile";
         }
     }
 }
