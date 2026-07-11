@@ -51,5 +51,13 @@ namespace FlowSync.Application.Repositories
             await _context.SaveChangesAsync(token);
             return true;
         }
+
+        public async Task<bool> IsUserVerifiedAsync(string email, CancellationToken token)
+        {
+            var result = await _context.Users
+                .FirstOrDefaultAsync(user => user.Email == email, token);
+
+            return result?.IsEmailVerified ?? false;
+        }
     }
 }

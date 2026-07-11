@@ -1,4 +1,5 @@
-﻿using FlowSync.Application.Contexts;
+﻿using FlowSync.Application.Configuration;
+using FlowSync.Application.Contexts;
 using FlowSync.Application.Models;
 using FlowSync.Application.Repositories;
 using FlowSync.Application.Services;
@@ -13,14 +14,19 @@ namespace FlowSync.Application
 {
     public static class ApplicationServiceCollectionExtensions
     {
-        public static IServiceCollection AddApplication(this IServiceCollection services)
+        public static IServiceCollection AddApplication(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddScoped<IAuthRepository, AuthRepository>();
             services.AddScoped<ITokenRepository, TokenRepository>();
+            services.AddScoped<IEmailVerificationRepository, EmailVerificationRepository>();
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IEmailVerificationService, EmailVerificationService>();
             services.AddValidatorsFromAssemblyContaining<IApplicationMarker>(ServiceLifetime.Scoped);
             services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
-            services.AddScoped<ITokenService, TokenService>();
+
+            services.Configure<SmtpOptions>(
+                configuration.GetSection("Smtp"));
             return services;
         }
 

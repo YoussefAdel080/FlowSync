@@ -86,7 +86,7 @@ builder.Services.Configure<JwtOptions>(
 // Add services to the container.
 builder.Services.AddControllers();
 
-builder.Services.AddApplication();
+builder.Services.AddApplication(builder.Configuration);
 builder.Services.AddDbContext(builder.Configuration);
 builder.Services.AddEndpointsApiExplorer();
 

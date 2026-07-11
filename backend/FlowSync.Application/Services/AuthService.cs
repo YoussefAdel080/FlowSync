@@ -3,7 +3,6 @@ using FlowSync.Application.Repositories;
 using FlowSync.Contracts.Requests;
 using FlowSync.Contracts.Responses;
 using FluentValidation;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 
 namespace FlowSync.Application.Services
@@ -18,9 +17,11 @@ namespace FlowSync.Application.Services
         private readonly IValidator<RefreshRequest> _refreshValidator;
         private readonly IValidator<LogoutRequest> _logoutValidator;
         private readonly IValidator<UpdateProfileRequest> _updateProfileValidator;
+        private readonly IEmailVerificationService _emailVerificationService;
+        private readonly IValidator<VerifyEmailRequest> _verifyEmailRequest;
 
-        public AuthService(IAuthRepository authRepository, IValidator<User> validator, IPasswordHasher<User> passwordHasher, IValidator<LoginRequest> loginValidator, ITokenService tokenService, IValidator<RefreshRequest> refreshValidator, IValidator<LogoutRequest> logoutValidator, IValidator<UpdateProfileRequest> updateProfileValidator)
-        {
+            public AuthService(IAuthRepository authRepository, IValidator<User> validator, IPasswordHasher<User> passwordHasher, IValidator<LoginRequest> loginValidator, ITokenService tokenService, IValidator<RefreshRequest> refreshValidator, IValidator<LogoutRequest> logoutValidator, IValidator<UpdateProfileRequest> updateProfileValidator, IEmailVerificationService emailVerificationService, IValidator<VerifyEmailRequest> verifyEmailRequest)
+            {
             _authRepository = authRepository;
             _validator = validator;
             _passwordHasher = passwordHasher;
@@ -29,6 +30,8 @@ namespace FlowSync.Application.Services
             _refreshValidator = refreshValidator;
             _logoutValidator = logoutValidator;
             _updateProfileValidator = updateProfileValidator;
+            _emailVerificationService = emailVerificationService;
+            _verifyEmailRequest = verifyEmailRequest;
         }
 
         public async Task<bool> Register(User user, CancellationToken token)
@@ -37,7 +40,11 @@ namespace FlowSync.Application.Services
 
             user.Password = _passwordHasher.HashPassword(user, user.Password);
 
-            return await _authRepository.Register(user, token);
+            var result = await _authRepository.Register(user, token);
+
+            await _emailVerificationService.SendVerificationEmailAsync(user.Email, user.Id, token);
+
+            return result;
         }
         public async Task<LoginResponseData> Login(LoginRequest request, CancellationToken token)
         {
@@ -129,6 +136,12 @@ namespace FlowSync.Application.Services
             await _updateProfileValidator.ValidateAndThrowAsync(request);
 
             return await _authRepository.UpdateUserProfileAsync(user ,request, cancellationToken);
+        }
+
+        public async Task<bool> VerifyEmail(VerifyEmailRequest request, CancellationToken token)
+        {
+            await _verifyEmailRequest.ValidateAndThrowAsync(request);
+            return await _emailVerificationService.VerifyEmailAsync(request.Email,request.Otp, token);
         }
     }
 }

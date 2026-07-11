@@ -65,6 +65,21 @@ namespace FlowSync.Controllers
             );
         }
 
+        [HttpPost($"{ApiEndpoints.Auth.VerifyEmail}")]
+        public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailRequest command, CancellationToken token)
+        {
+            var result = await _authService.VerifyEmail(command, token);
+
+            return Ok(
+                new BaseResponse<bool>
+                {
+                    Success = true,
+                    Message = "Email verified successful.",
+                    Data = true
+                }
+            );
+        }
+
         [HttpPost($"{ApiEndpoints.Auth.Logout}")]
         public async Task<IActionResult> Logout([FromBody] LogoutRequest command, CancellationToken token)
         {
