@@ -18,9 +18,10 @@ namespace FlowSync.Application.Services
         private readonly IValidator<LogoutRequest> _logoutValidator;
         private readonly IValidator<UpdateProfileRequest> _updateProfileValidator;
         private readonly IEmailVerificationService _emailVerificationService;
-        private readonly IValidator<VerifyEmailRequest> _verifyEmailRequest;
+        private readonly IValidator<VerifyEmailRequest> _verifyEmailValidator;
+        private readonly IValidator<ChangePasswordRequest> _changePasswordValidator;
 
-            public AuthService(IAuthRepository authRepository, IValidator<User> validator, IPasswordHasher<User> passwordHasher, IValidator<LoginRequest> loginValidator, ITokenService tokenService, IValidator<RefreshRequest> refreshValidator, IValidator<LogoutRequest> logoutValidator, IValidator<UpdateProfileRequest> updateProfileValidator, IEmailVerificationService emailVerificationService, IValidator<VerifyEmailRequest> verifyEmailRequest)
+            public AuthService(IAuthRepository authRepository, IValidator<User> validator, IPasswordHasher<User> passwordHasher, IValidator<LoginRequest> loginValidator, ITokenService tokenService, IValidator<RefreshRequest> refreshValidator, IValidator<LogoutRequest> logoutValidator, IValidator<UpdateProfileRequest> updateProfileValidator, IEmailVerificationService emailVerificationService, IValidator<VerifyEmailRequest> verifyEmailValidator, IValidator<ChangePasswordRequest> changePasswordValidator)
             {
             _authRepository = authRepository;
             _validator = validator;
@@ -31,7 +32,8 @@ namespace FlowSync.Application.Services
             _logoutValidator = logoutValidator;
             _updateProfileValidator = updateProfileValidator;
             _emailVerificationService = emailVerificationService;
-            _verifyEmailRequest = verifyEmailRequest;
+            _verifyEmailValidator = verifyEmailValidator;
+            _changePasswordValidator = changePasswordValidator;
         }
 
         public async Task<bool> Register(User user, CancellationToken token)
@@ -140,8 +142,15 @@ namespace FlowSync.Application.Services
 
         public async Task<bool> VerifyEmail(VerifyEmailRequest request, CancellationToken token)
         {
-            await _verifyEmailRequest.ValidateAndThrowAsync(request);
+            await _verifyEmailValidator.ValidateAndThrowAsync(request);
             return await _emailVerificationService.VerifyEmailAsync(request.Email,request.Otp, token);
+        }
+
+        public async Task<bool> ChangePassword(Guid userId, ChangePasswordRequest request, CancellationToken token)
+        {
+            await _changePasswordValidator.ValidateAndThrowAsync(request);
+
+            return await _authRepository.ChangePassword(userId, request, token);
         }
     }
 }

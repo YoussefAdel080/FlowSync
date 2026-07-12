@@ -146,5 +146,26 @@ namespace FlowSync.Controllers
                 Data = true
             });
         }
+
+        [Authorize]
+        [HttpPut($"{ApiEndpoints.Auth.ChangePassword}")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request, CancellationToken token)
+        {
+            var userId = HttpContext.GetUserId();
+            if (userId is null)
+            {
+                return Unauthorized();
+            }
+
+            var result = await _authService.ChangePassword(userId.Value, request, token);
+
+            return Ok(new BaseResponse<bool>
+            {
+                Success = true,
+                Message = "Password changed successfully.",
+                Data = true
+            });
+        }
+
     }
 }

@@ -11,5 +11,6 @@ namespace FlowSync.Application.Repositories
         Task<User?> GetUserByEmailAsync(string email, CancellationToken token);
         Task<User?> GetUserByIdAsync(Guid id, CancellationToken token);
         Task<bool> UpdateUserProfileAsync(User user,UpdateProfileRequest request, CancellationToken token);
+        Task<bool> ChangePassword(Guid userId, ChangePasswordRequest request, CancellationToken token);
     }
 }
