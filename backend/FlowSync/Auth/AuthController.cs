@@ -167,5 +167,41 @@ namespace FlowSync.Controllers
             });
         }
 
+        [HttpPost($"{ApiEndpoints.Auth.ForgotPassword}")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request, CancellationToken token)
+        {
+            await _authService.ForgotPassword(request, token);
+
+            return Ok(new BaseResponse<bool>
+            {
+                Success = true,
+                Message = "If an account with that email exists, a password reset code has been sent.",
+                Data = true
+            });
+        }
+
+        [HttpPost($"{ApiEndpoints.Auth.ResetPassword}")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request, CancellationToken token)
+        {
+            var result = await _authService.ResetPassword(request, token);
+
+            if (!result)
+            {
+                return BadRequest(new BaseResponse<object>
+                {
+                    Success = false,
+                    Message = "Unable to reset password. Please check your reset code and try again.",
+                    Data = null
+                });
+            }
+
+            return Ok(new BaseResponse<bool>
+            {
+                Success = true,
+                Message = "Password reset successfully.",
+                Data = true
+            });
+        }
+
     }
 }

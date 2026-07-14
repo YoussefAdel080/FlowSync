@@ -77,5 +77,28 @@ namespace FlowSync.Application.Repositories
             var result = await _context.SaveChangesAsync(cancellationToken);
             return result > 0;
         }
+
+        public async Task<bool> RevokeAllRefreshTokensForUserAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            var activeTokens = await _context.RefreshTokens
+                .Where(rt => rt.UserId == userId && !rt.IsRevoked)
+                .ToListAsync(cancellationToken);
+
+            if (activeTokens.Count == 0)
+            {
+                return true;
+            }
+
+            var revokedAt = DateTime.UtcNow;
+
+            foreach (var refreshToken in activeTokens)
+            {
+                refreshToken.IsRevoked = true;
+                refreshToken.RevokedAt = revokedAt;
+            }
+
+            var result = await _context.SaveChangesAsync(cancellationToken);
+            return result > 0;
+        }
     }
 }

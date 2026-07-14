@@ -130,4 +130,9 @@ public class TokenService : ITokenService
     {
         return await _refreshTokenRepository.RevokeRefreshTokenAsync(token, cancellationToken);
     }
+
+    public async Task<bool> RevokeAllRefreshTokensForUserAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        return await _refreshTokenRepository.RevokeAllRefreshTokensForUserAsync(userId, cancellationToken);
+    }
 }

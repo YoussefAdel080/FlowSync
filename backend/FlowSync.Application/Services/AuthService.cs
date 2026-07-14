@@ -18,10 +18,13 @@ namespace FlowSync.Application.Services
         private readonly IValidator<LogoutRequest> _logoutValidator;
         private readonly IValidator<UpdateProfileRequest> _updateProfileValidator;
         private readonly IEmailVerificationService _emailVerificationService;
+        private readonly IPasswordResetService _passwordResetService;
         private readonly IValidator<VerifyEmailRequest> _verifyEmailValidator;
         private readonly IValidator<ChangePasswordRequest> _changePasswordValidator;
+        private readonly IValidator<ForgotPasswordRequest> _forgotPasswordValidator;
+        private readonly IValidator<ResetPasswordRequest> _resetPasswordValidator;
 
-            public AuthService(IAuthRepository authRepository, IValidator<User> validator, IPasswordHasher<User> passwordHasher, IValidator<LoginRequest> loginValidator, ITokenService tokenService, IValidator<RefreshRequest> refreshValidator, IValidator<LogoutRequest> logoutValidator, IValidator<UpdateProfileRequest> updateProfileValidator, IEmailVerificationService emailVerificationService, IValidator<VerifyEmailRequest> verifyEmailValidator, IValidator<ChangePasswordRequest> changePasswordValidator)
+            public AuthService(IAuthRepository authRepository, IValidator<User> validator, IPasswordHasher<User> passwordHasher, IValidator<LoginRequest> loginValidator, ITokenService tokenService, IValidator<RefreshRequest> refreshValidator, IValidator<LogoutRequest> logoutValidator, IValidator<UpdateProfileRequest> updateProfileValidator, IEmailVerificationService emailVerificationService, IPasswordResetService passwordResetService, IValidator<VerifyEmailRequest> verifyEmailValidator, IValidator<ChangePasswordRequest> changePasswordValidator, IValidator<ForgotPasswordRequest> forgotPasswordValidator, IValidator<ResetPasswordRequest> resetPasswordValidator)
             {
             _authRepository = authRepository;
             _validator = validator;
@@ -32,8 +35,11 @@ namespace FlowSync.Application.Services
             _logoutValidator = logoutValidator;
             _updateProfileValidator = updateProfileValidator;
             _emailVerificationService = emailVerificationService;
+            _passwordResetService = passwordResetService;
             _verifyEmailValidator = verifyEmailValidator;
             _changePasswordValidator = changePasswordValidator;
+            _forgotPasswordValidator = forgotPasswordValidator;
+            _resetPasswordValidator = resetPasswordValidator;
         }
 
         public async Task<bool> Register(User user, CancellationToken token)
@@ -151,6 +157,20 @@ namespace FlowSync.Application.Services
             await _changePasswordValidator.ValidateAndThrowAsync(request);
 
             return await _authRepository.ChangePassword(userId, request, token);
+        }
+
+        public async Task<bool> ForgotPassword(ForgotPasswordRequest request, CancellationToken token)
+        {
+            await _forgotPasswordValidator.ValidateAndThrowAsync(request);
+
+            return await _passwordResetService.SendPasswordResetEmailAsync(request.Email, token);
+        }
+
+        public async Task<bool> ResetPassword(ResetPasswordRequest request, CancellationToken token)
+        {
+            await _resetPasswordValidator.ValidateAndThrowAsync(request);
+
+            return await _passwordResetService.ResetPasswordAsync(request, token);
         }
     }
 }

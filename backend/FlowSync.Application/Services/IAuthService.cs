@@ -14,5 +14,7 @@ namespace FlowSync.Application.Services
         Task<GetProfileResponse?> GetProfile(Guid userId,CancellationToken cancellationToken);
         Task<bool> UpdateProfile(Guid userId, UpdateProfileRequest requset,CancellationToken cancellationToken);
         Task<bool> ChangePassword(Guid userId ,ChangePasswordRequest request ,CancellationToken token);
+        Task<bool> ForgotPassword(ForgotPasswordRequest request, CancellationToken token);
+        Task<bool> ResetPassword(ResetPasswordRequest request, CancellationToken token);
     }
 }

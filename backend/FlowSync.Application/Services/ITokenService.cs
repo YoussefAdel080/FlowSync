@@ -12,4 +12,5 @@ public interface ITokenService
     Task<RefreshToken?> GetRefreshTokenAsync(string token, CancellationToken cancellationToken);
     Task<LoginResponseData?> RefreshTokenAsync(string token, CancellationToken cancellationToken);
     Task<bool> LogoutAsync(string token, CancellationToken cancellationToken);
+    Task<bool> RevokeAllRefreshTokensForUserAsync(Guid userId, CancellationToken cancellationToken);
 }
