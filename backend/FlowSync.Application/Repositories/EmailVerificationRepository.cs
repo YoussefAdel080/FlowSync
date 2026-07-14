@@ -16,6 +16,23 @@ namespace FlowSync.Application.Repositories
             _authRepository = authRepository;
         }
 
+        public async Task InvalidateActiveVerificationsAsync(Guid userId, CancellationToken token)
+        {
+            var activeVerifications = await _context.EmailVerifications
+                .Where(ev => ev.UserId == userId && !ev.IsUsed)
+                .ToListAsync(token);
+
+            foreach (var verification in activeVerifications)
+            {
+                verification.IsUsed = true;
+            }
+
+            if (activeVerifications.Count > 0)
+            {
+                await _context.SaveChangesAsync(token);
+            }
+        }
+
         public async Task<bool> AddEmailVerificationAsync(Guid userId, string otp, CancellationToken token)
         {
             var emailVerification = new EmailVerification
@@ -26,8 +43,8 @@ namespace FlowSync.Application.Repositories
                 ExpiresAt = DateTime.UtcNow.AddMinutes(10),
             };
 
-            await _context.EmailVerifications.AddAsync(emailVerification);
-            await _context.SaveChangesAsync();
+            await _context.EmailVerifications.AddAsync(emailVerification, token);
+            await _context.SaveChangesAsync(token);
 
             return true;
         }
@@ -83,6 +100,15 @@ namespace FlowSync.Application.Repositories
 
             user.IsEmailVerified = true;
             result.IsUsed = true;
+
+            var otherActiveVerifications = await _context.EmailVerifications
+                .Where(ev => ev.UserId == user.Id && !ev.IsUsed && ev.Id != result.Id)
+                .ToListAsync(token);
+
+            foreach (var verification in otherActiveVerifications)
+            {
+                verification.IsUsed = true;
+            }
 
             await _context.SaveChangesAsync(token);
 

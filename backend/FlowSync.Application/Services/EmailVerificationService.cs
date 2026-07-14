@@ -32,6 +32,8 @@ namespace FlowSync.Application.Services
         public async Task<bool> SendVerificationEmailAsync(string email, Guid userId, CancellationToken token)
         {
             var otp = GenerateVerificationOtp();
+
+            await _emailVerificationRepository.InvalidateActiveVerificationsAsync(userId, token);
             var result = await _emailVerificationRepository.AddEmailVerificationAsync(userId, otp, token);
 
             if (result)

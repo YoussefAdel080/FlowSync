@@ -2,6 +2,7 @@
 {
     public interface IEmailVerificationRepository
     {
+        Task InvalidateActiveVerificationsAsync(Guid userId, CancellationToken token);
         Task<bool> AddEmailVerificationAsync(Guid userId, string otp, CancellationToken token);
         Task<bool> OtpExistsAsync(string otp, CancellationToken token);
         Task<bool> OtpExpiredAsync(string otp, CancellationToken token);
