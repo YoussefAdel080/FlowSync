@@ -18,5 +18,12 @@
             public const string Logout = $"{Base}/Logout";
             public const string Profile = $"{Base}/Profile";
         }
+        public static class Workspace
+        {
+            private const string Base = $"{ApiBase}/Workspace";
+
+            public const string Create = $"{Base}";
+            public const string Update = $"{Base}";
+        }
     }
 }

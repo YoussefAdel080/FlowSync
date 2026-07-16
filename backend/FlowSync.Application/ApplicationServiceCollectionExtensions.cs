@@ -4,6 +4,7 @@ using FlowSync.Application.Models;
 using FlowSync.Application.Repositories;
 using FlowSync.Application.Services;
 using FluentValidation;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -26,6 +27,10 @@ namespace FlowSync.Application
             services.AddScoped<IPasswordResetService, PasswordResetService>();
             services.AddValidatorsFromAssemblyContaining<IApplicationMarker>(ServiceLifetime.Scoped);
             services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
+            services.AddScoped<IWorkspaceRepository, WorkspaceRepository>();
+            services.AddScoped<IWorkspaceService, WorkspaceService>();
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
             services.Configure<SmtpOptions>(
                 configuration.GetSection("Smtp"));

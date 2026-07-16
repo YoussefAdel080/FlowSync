@@ -13,6 +13,7 @@ namespace FlowSync.Application.Contexts
         public DbSet<EmailVerification> EmailVerifications { get; set; }
         public DbSet<PasswordReset> PasswordResets { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<Workspace> Workspaces { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -30,6 +31,12 @@ namespace FlowSync.Application.Contexts
                 entity.HasOne(rt => rt.ReplacedByToken)
                     .WithMany()
                     .HasForeignKey(rt => rt.ReplacedByTokenId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                modelBuilder.Entity<Workspace>()
+                    .HasOne(w => w.Owner)
+                    .WithMany(u => u.Workspaces)
+                    .HasForeignKey(w => w.OwnerId)
                     .OnDelete(DeleteBehavior.Restrict);
             });
         }
