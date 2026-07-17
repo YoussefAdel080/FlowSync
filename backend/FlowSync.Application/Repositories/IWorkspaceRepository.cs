@@ -1,4 +1,5 @@
-﻿using FlowSync.Contracts.Requests;
+﻿using FlowSync.Application.Models;
+using FlowSync.Contracts.Requests;
 
 namespace FlowSync.Application.Repositories
 {
@@ -6,8 +7,11 @@ namespace FlowSync.Application.Repositories
     {
         Task<bool> CreateWorkspaceAsync(CreateWorkspaceRequest request, Guid userId, CancellationToken token);
         Task<bool> UpdateWorkspaceAsync(UpdateWorkspaceRequest request, Guid userId, CancellationToken token);
+        Task<bool> DeleteWorkspaceAsync(DeleteWorkspaceRequest request, Guid userId, CancellationToken token);
         Task<bool> WorkspaceExistsByNameAsync(string name, Guid userId, CancellationToken token);
         Task<bool> WorkspaceExistsByIdAsync(Guid id, CancellationToken token);
         Task<bool> IsWorkspaceOwnerAsync(Guid id, Guid userId,CancellationToken token);
+        Task<IEnumerable<Workspace>> GetMyWorkspacesAsync(Guid userId, CancellationToken token);
+        Task<Workspace?> GetWorkspaceByIdAsync(Guid id, CancellationToken token);
     }
 }

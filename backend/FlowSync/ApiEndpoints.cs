@@ -24,6 +24,9 @@
 
             public const string Create = $"{Base}";
             public const string Update = $"{Base}";
+            public const string Delete = $"{Base}";
+            public const string MyWorkspaces = $"{Base}/My-Workspaces";
+            public const string GetById = $"{Base}/{{id:guid}}";
         }
     }
 }

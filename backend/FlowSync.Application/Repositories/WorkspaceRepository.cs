@@ -78,5 +78,38 @@ namespace FlowSync.Application.Repositories
 
             return true;
         }
+
+        public async Task<bool> DeleteWorkspaceAsync(DeleteWorkspaceRequest request, Guid userId, CancellationToken token)
+        {
+            var workspace = await _context.Workspaces
+                .FirstOrDefaultAsync(w => w.Id == request.Id, token);
+
+            if (workspace == null || workspace.OwnerId != userId)
+            {
+                return false;
+            }
+            
+            _context.Workspaces.Remove(workspace);
+            await _context.SaveChangesAsync(token);
+
+            return true;
+        }
+
+        public async Task<IEnumerable<Workspace>> GetMyWorkspacesAsync(Guid userId, CancellationToken token)
+        {
+            return await _context.Workspaces
+                .AsNoTracking()
+                .Include(w => w.Owner)
+                .Where(w => w.OwnerId == userId)
+                .ToListAsync(token);
+        }
+
+        public async Task<Workspace?> GetWorkspaceByIdAsync(Guid id, CancellationToken token)
+        {
+            return await _context.Workspaces
+                .AsNoTracking()
+                .Include(w => w.Owner)
+                .FirstOrDefaultAsync(w => w.Id == id, token);
+        }
     }
 }
