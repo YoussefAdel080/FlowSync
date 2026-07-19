@@ -1,4 +1,5 @@
-﻿using FlowSync.Application.Models;
+﻿using FlowSync.Application.Enums;
+using FlowSync.Application.Models;
 using FlowSync.Contracts.Requests;
 
 namespace FlowSync.Application.Repositories
@@ -13,5 +14,6 @@ namespace FlowSync.Application.Repositories
         Task<bool> IsWorkspaceOwnerAsync(Guid id, Guid userId,CancellationToken token);
         Task<IEnumerable<Workspace>> GetMyWorkspacesAsync(Guid userId, CancellationToken token);
         Task<Workspace?> GetWorkspaceByIdAsync(Guid id, CancellationToken token);
+        Task<WorkspaceMember> CreateWorkspaceMemberAsync(Guid workspaceId, Guid userId, WorkspaceRole role, CancellationToken token);
     }
 }

@@ -80,9 +80,11 @@ namespace FlowSync.Application.Services
                 throw new NotFoundException($"Workspace with ID {id} does not exist.");
             }
 
-            if (workspace.OwnerId != userId)
+            var isWorkspaceOwner = await _workspaceRepository.IsWorkspaceOwnerAsync(id, userId, token);
+
+            if (!isWorkspaceOwner)
             {
-                throw new ForbiddenException("You are not allowed to view this workspace.");
+                throw new ForbiddenException($"You are not allowed to update this workspace.");
             }
 
             return workspace;

@@ -1,4 +1,5 @@
 ﻿using FlowSync.Application.Contexts;
+using FlowSync.Application.Enums;
 using FlowSync.Application.Models;
 using FlowSync.Contracts.Requests;
 using Microsoft.EntityFrameworkCore;
@@ -21,10 +22,12 @@ namespace FlowSync.Application.Repositories
                 Id = Guid.NewGuid(),
                 Name = request.Name,
                 Description = request.Description,
-                OwnerId = userId,
                 NormalizedName = request.Name.Trim().ToUpperInvariant(),
                 CreatedAt = DateTime.UtcNow
             };
+
+            var ownerWorkspaceMembership = await CreateWorkspaceMemberAsync(newWorkspace.Id, userId, WorkspaceRole.Owner, token);
+
             _context.Workspaces.Add(newWorkspace);
             await _context.SaveChangesAsync(token);
             return true;
@@ -33,7 +36,7 @@ namespace FlowSync.Application.Repositories
         public async Task<bool> WorkspaceExistsByNameAsync(string name, Guid userId, CancellationToken token)
         {
             var workspace = await _context.Workspaces
-                .FirstOrDefaultAsync(w => w.NormalizedName == name && w.OwnerId == userId, token);
+                .FirstOrDefaultAsync(w => w.NormalizedName == name, token);
 
             return workspace != null;
         }
@@ -48,14 +51,20 @@ namespace FlowSync.Application.Repositories
 
         public async Task<bool> UpdateWorkspaceAsync(UpdateWorkspaceRequest request, Guid userId, CancellationToken token)
         {
-            var workspace = await _context.Workspaces
-                .FirstOrDefaultAsync(w => w.Id == request.Id, token);
+            var workspaceOwnerMembership = await _context.WorkspaceMembers
+                .Include(wm => wm.Workspace)
+                .FirstOrDefaultAsync(wm => 
+                wm.WorkspaceId == request.Id &&
+                wm.UserId == userId &&
+                wm.Role == WorkspaceRole.Owner, token);
 
-            if (workspace == null || workspace.OwnerId != userId)
+            if (workspaceOwnerMembership == null || workspaceOwnerMembership.Workspace == null)
             {
                 return false;
             }
 
+            var workspace = workspaceOwnerMembership.Workspace;
+                
             workspace.Name = request.Name;
             workspace.Description = request.Description;
             workspace.NormalizedName = request.Name.Trim().ToUpperInvariant();
@@ -68,27 +77,32 @@ namespace FlowSync.Application.Repositories
 
         public async Task<bool> IsWorkspaceOwnerAsync(Guid id, Guid userId, CancellationToken token)
         {
-            var workspace = await _context.Workspaces
-                .FirstOrDefaultAsync(w => w.Id == id, token);
+            var workspaceOwnerMembership = await _context.WorkspaceMembers
+                .AnyAsync(wm =>
+                wm.WorkspaceId == id &&
+                wm.UserId == userId &&
+                wm.Role == WorkspaceRole.Owner,
+                token);
 
-            if (workspace == null || workspace.OwnerId != userId)
-            {
-                return false;
-            }
-
-            return true;
+            return workspaceOwnerMembership;
         }
 
         public async Task<bool> DeleteWorkspaceAsync(DeleteWorkspaceRequest request, Guid userId, CancellationToken token)
         {
-            var workspace = await _context.Workspaces
-                .FirstOrDefaultAsync(w => w.Id == request.Id, token);
+            var workspaceOwnerMembership = await _context.WorkspaceMembers
+                .Include(wm => wm.Workspace)
+                .FirstOrDefaultAsync(wm =>
+                wm.WorkspaceId == request.Id &&
+                wm.UserId == userId &&
+                wm.Role == WorkspaceRole.Owner, token);
 
-            if (workspace == null || workspace.OwnerId != userId)
+            if (workspaceOwnerMembership == null || workspaceOwnerMembership.Workspace == null)
             {
                 return false;
             }
-            
+
+            var workspace = workspaceOwnerMembership.Workspace;
+
             _context.Workspaces.Remove(workspace);
             await _context.SaveChangesAsync(token);
 
@@ -97,19 +111,41 @@ namespace FlowSync.Application.Repositories
 
         public async Task<IEnumerable<Workspace>> GetMyWorkspacesAsync(Guid userId, CancellationToken token)
         {
-            return await _context.Workspaces
+            var workspaceOwnerMemberships = await _context.WorkspaceMembers
                 .AsNoTracking()
-                .Include(w => w.Owner)
-                .Where(w => w.OwnerId == userId)
+                .Where(wm => wm.UserId == userId && wm.Role == WorkspaceRole.Owner)
+                .Include(wm => wm.Workspace)
+                    .ThenInclude(w => w.Members)
                 .ToListAsync(token);
+
+            return workspaceOwnerMemberships.Select(wm => wm.Workspace);
         }
 
         public async Task<Workspace?> GetWorkspaceByIdAsync(Guid id, CancellationToken token)
         {
-            return await _context.Workspaces
+            var worksapceMmbership = await _context.WorkspaceMembers
                 .AsNoTracking()
-                .Include(w => w.Owner)
-                .FirstOrDefaultAsync(w => w.Id == id, token);
+                .Include(wm => wm.Workspace)
+                .FirstOrDefaultAsync(w => w.WorkspaceId == id, token);
+
+            return worksapceMmbership?.Workspace;
+        }
+
+        public async Task<WorkspaceMember> CreateWorkspaceMemberAsync(Guid workspaceId, Guid userId, WorkspaceRole role, CancellationToken token)
+        {
+            var workspaceMembership = new WorkspaceMember
+            {
+                Id = Guid.NewGuid(),
+                WorkspaceId = workspaceId,
+                UserId = userId,
+                Role = role,
+                JoinedAt = DateTime.UtcNow,
+            };
+
+            await _context.WorkspaceMembers.AddAsync(workspaceMembership);
+            await _context.SaveChangesAsync(token);
+
+            return workspaceMembership;
         }
     }
 }

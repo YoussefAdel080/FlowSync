@@ -1,4 +1,5 @@
-﻿using FlowSync.Application.Models;
+﻿using FlowSync.Application.Exceptions;
+using FlowSync.Application.Models;
 using FlowSync.Application.Repositories;
 using FlowSync.Contracts.Requests;
 using FlowSync.Contracts.Responses;
@@ -62,7 +63,7 @@ namespace FlowSync.Application.Services
 
             if (user is null)
             {
-                throw new Exception("User Doesn't Exist");
+                throw new NotFoundException("User Doesn't Exist");
             }
 
             var result = _passwordHasher.VerifyHashedPassword(
@@ -72,7 +73,7 @@ namespace FlowSync.Application.Services
 
             if (result == PasswordVerificationResult.Failed)
             {
-                throw new Exception("Invalid Password");
+                throw new BadRequestException("Invalid Password");
             }
 
             var accessToken = _tokenService.GenerateAccessToken(user);
