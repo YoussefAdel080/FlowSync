@@ -1,3 +1,4 @@
+using FlowSync.Application.Enums;
 using FlowSync.Application.Models;
 using FlowSync.Contracts.Responses;
 
@@ -7,19 +8,22 @@ namespace FlowSync.Mapping
     {
         public static WorkspaceResponse MapToWorkspaceResponse(this Workspace workspace)
         {
+            var ownerMember = workspace.Members
+                .FirstOrDefault(m => m.Role == WorkspaceRole.Owner);
+
             return new WorkspaceResponse
             {
                 Id = workspace.Id,
                 Name = workspace.Name,
                 Description = workspace.Description,
-                OwnerId = workspace.OwnerId,
+                OwnerId = ownerMember.UserId,
                 CreatedAt = workspace.CreatedAt,
                 Owner = new WorkspaceOwnerResponse
                 {
-                    Id = workspace.Owner.Id,
-                    FirstName = workspace.Owner.FirstName,
-                    LastName = workspace.Owner.LastName,
-                    Email = workspace.Owner.Email
+                    Id = ownerMember.User.Id,
+                    FirstName = ownerMember.User.FirstName,
+                    LastName = ownerMember.User.LastName,
+                    Email = ownerMember.User.Email
                 }
             };
         }

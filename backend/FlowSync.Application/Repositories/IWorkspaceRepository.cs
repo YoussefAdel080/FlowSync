@@ -15,5 +15,6 @@ namespace FlowSync.Application.Repositories
         Task<IEnumerable<Workspace>> GetMyWorkspacesAsync(Guid userId, CancellationToken token);
         Task<Workspace?> GetWorkspaceByIdAsync(Guid id, CancellationToken token);
         Task<WorkspaceMember> CreateWorkspaceMemberAsync(Guid workspaceId, Guid userId, WorkspaceRole role, CancellationToken token);
+        Task<WorkspaceMember?> GetWorkspaceMembershipAsync(Guid workspaceId, Guid userId, CancellationToken token);
     }
 }

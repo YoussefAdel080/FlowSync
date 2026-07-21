@@ -9,6 +9,6 @@ namespace FlowSync.Application.Services
         Task<bool> UpdateWorkspaceAsync(UpdateWorkspaceRequest request, Guid userId, CancellationToken token);
         Task<bool> DeleteWorkspaceAsync(DeleteWorkspaceRequest request, Guid userId, CancellationToken token);
         Task<IEnumerable<Workspace>> GetMyWorkspacesAsync(Guid userId, CancellationToken token);
-        Task<Workspace> GetWorkspaceByIdAsync(Guid id, Guid userId, CancellationToken token);
+        Task<Workspace?> GetWorkspaceByIdAsync(Guid id, Guid userId, CancellationToken token);
     }
 }

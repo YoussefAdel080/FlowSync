@@ -116,6 +116,7 @@ namespace FlowSync.Application.Repositories
                 .Where(wm => wm.UserId == userId && wm.Role == WorkspaceRole.Owner)
                 .Include(wm => wm.Workspace)
                     .ThenInclude(w => w.Members)
+                    .ThenInclude(m => m.User)
                 .ToListAsync(token);
 
             return workspaceOwnerMemberships.Select(wm => wm.Workspace);
@@ -146,6 +147,18 @@ namespace FlowSync.Application.Repositories
             await _context.SaveChangesAsync(token);
 
             return workspaceMembership;
+        }
+
+        public async Task<WorkspaceMember?> GetWorkspaceMembershipAsync(Guid workspaceId, Guid userId, CancellationToken token)
+        {
+            var membership = await _context.WorkspaceMembers
+                .AsNoTracking()
+                .Include(wm => wm.Workspace)
+                    .ThenInclude(w => w.Members)
+                    .ThenInclude(m => m.User)
+                .FirstOrDefaultAsync(wm => wm.UserId == userId && wm.WorkspaceId == workspaceId);
+
+            return membership;
         }
     }
 }
