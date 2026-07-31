@@ -1,4 +1,5 @@
-﻿using FlowSync.Application.Services;
+﻿using FlowSync.Application.Models;
+using FlowSync.Application.Services;
 using FlowSync.Auth;
 using FlowSync.Contracts.Requests;
 using Microsoft.AspNetCore.Authorization;
@@ -14,6 +15,26 @@ namespace FlowSync.Controllers
         public WorkspaceInvitationController(IWorkspaceInvitationService workspaceInvitationService)
         {
             _workspaceInvitationService = workspaceInvitationService;
+        }
+
+        [Authorize]
+        [HttpGet($"{ApiEndpoints.WorkspaceInvitation.GetPendingInvetations}")]
+        public async Task<IActionResult> GetPendingWorkspaceInvitations([FromQuery] GetPendingWorkspaceInvitationsRequest command, CancellationToken token)
+        {
+            var userId = HttpContext.GetUserId();
+            if (userId is null)
+            {
+                return Unauthorized();
+            }
+
+            var result = await _workspaceInvitationService.GetPendingWorkspaceInvitationsAsync(command, userId.Value, token);
+
+            return Ok(new BaseResponse<IEnumerable<WorkspaceInvitation>>
+            {
+                Success = true,
+                Message = "Pending Workspace Invitations Fetched Successfully.",
+                Data = result
+            });
         }
 
         [Authorize]

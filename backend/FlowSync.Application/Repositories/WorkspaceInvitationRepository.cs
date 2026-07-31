@@ -1,5 +1,6 @@
 ﻿using FlowSync.Application.Configuration;
 using FlowSync.Application.Contexts;
+using FlowSync.Application.Enums;
 using FlowSync.Application.Models;
 using FlowSync.Contracts.Enums;
 using FlowSync.Contracts.Requests;
@@ -139,6 +140,18 @@ namespace FlowSync.Application.Repositories
             _context.SaveChanges();
 
             return true;
+        }
+
+        public async Task<IEnumerable<WorkspaceInvitation>> GetPendingWorkspaceInvitationsAsync(GetPendingWorkspaceInvitationsRequest request, CancellationToken token) {
+            var invitations = await _context.WorkspaceInvitations
+                .AsNoTracking()
+                .Where(i => i.WorkspaceId == request.WorkspaceId && i.Status == WorkspaceInvitationStatus.Pending)
+                .Include(i => i.Workspace)
+                .Include(i => i.InvitedBy)
+                .ToListAsync(token);
+
+
+            return invitations;
         }
 
         private async Task<bool> sendInvitationEmail(string email, string invitationToken, WorkspaceRole role, string workspaceName, string senderName, CancellationToken token)

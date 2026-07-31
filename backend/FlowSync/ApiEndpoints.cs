@@ -31,6 +31,7 @@
         public static class WorkspaceInvitation
         {
             private const string Base = $"{ApiBase}/WorkspaceInvitation";
+            public const string GetPendingInvetations = $"{Base}/Pending";
             public const string Invite = $"{Base}";
             public const string Accept = $"{Base}/Accept";
             public const string Decline = $"{Base}/Decline";

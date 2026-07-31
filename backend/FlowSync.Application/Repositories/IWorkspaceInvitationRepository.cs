@@ -12,5 +12,6 @@ namespace FlowSync.Application.Repositories
         Task<bool> CancelWorkspaceInvitationAsync(CancelWorkspaceInvitationRequest request, CancellationToken token);
         Task<WorkspaceInvitation?> GetWorkspaceInvitationByTokenAndEmailAsync(string InvitationToken, string email, CancellationToken token);
         Task<WorkspaceInvitation?> GetWorkspaceInvitationByIdAsync(Guid id, CancellationToken token);
+        Task<IEnumerable<WorkspaceInvitation>> GetPendingWorkspaceInvitationsAsync(GetPendingWorkspaceInvitationsRequest request, CancellationToken token);
     }
 }
