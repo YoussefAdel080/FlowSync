@@ -4,6 +4,7 @@ using FlowSync.Application.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FlowSync.Application.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260731001312_WorkspaceMembershipAndInvitation")]
+    partial class WorkspaceMembershipAndInvitation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -203,7 +206,7 @@ namespace FlowSync.Application.Migrations
 
                     b.Property<string>("Token")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -215,9 +218,6 @@ namespace FlowSync.Application.Migrations
 
                     b.HasIndex("InvitedById");
 
-                    b.HasIndex("Token")
-                        .IsUnique();
-
                     b.HasIndex("WorkspaceId");
 
                     b.ToTable("WorkspaceInvitations");
@@ -227,6 +227,9 @@ namespace FlowSync.Application.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("InvitedById")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("JoinedAt")
@@ -241,16 +244,11 @@ namespace FlowSync.Application.Migrations
                     b.Property<Guid>("WorkspaceId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("WorkspaceInvitationId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("InvitedById");
 
-                    b.HasIndex("WorkspaceInvitationId")
-                        .IsUnique()
-                        .HasFilter("[WorkspaceInvitationId] IS NOT NULL");
+                    b.HasIndex("UserId");
 
                     b.HasIndex("WorkspaceId", "UserId")
                         .IsUnique();
@@ -319,6 +317,12 @@ namespace FlowSync.Application.Migrations
 
             modelBuilder.Entity("FlowSync.Application.Models.WorkspaceMember", b =>
                 {
+                    b.HasOne("FlowSync.Application.Models.User", "InvitedBy")
+                        .WithMany()
+                        .HasForeignKey("InvitedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("FlowSync.Application.Models.User", "User")
                         .WithMany("WorkspaceMemberships")
                         .HasForeignKey("UserId")
@@ -331,16 +335,11 @@ namespace FlowSync.Application.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("FlowSync.Application.Models.WorkspaceInvitation", "WorkspaceInvitation")
-                        .WithOne()
-                        .HasForeignKey("FlowSync.Application.Models.WorkspaceMember", "WorkspaceInvitationId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                    b.Navigation("InvitedBy");
 
                     b.Navigation("User");
 
                     b.Navigation("Workspace");
-
-                    b.Navigation("WorkspaceInvitation");
                 });
 
             modelBuilder.Entity("FlowSync.Application.Models.User", b =>

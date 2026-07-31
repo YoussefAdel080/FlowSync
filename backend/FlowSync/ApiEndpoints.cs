@@ -28,5 +28,12 @@
             public const string MyWorkspaces = $"{Base}/My-Workspaces";
             public const string GetById = $"{Base}/{{id:guid}}";
         }
+        public static class WorkspaceInvitation
+        {
+            private const string Base = $"{ApiBase}/WorkspaceInvitation";
+            public const string Invite = $"{Base}/Invite";
+            public const string Accept = $"{Base}/Accept";
+            public const string Decline = $"{Base}/Decline";
+        }
     }
 }

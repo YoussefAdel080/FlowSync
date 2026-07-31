@@ -29,6 +29,9 @@ namespace FlowSync.Application
             services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IWorkspaceRepository, WorkspaceRepository>();
+            services.AddScoped<IWorkspaceAuthorizationService, WorkspaceAuthorizationService>();
+            services.AddScoped<IWorkspaceInvitationRepository, WorkspaceInvitationRepository>();
+            services.AddScoped<IWorkspaceInvitationService, WorkspaceInvitationService>();
             services.AddScoped<IWorkspaceService, WorkspaceService>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 

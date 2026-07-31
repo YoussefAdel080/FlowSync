@@ -1,5 +1,5 @@
-using FlowSync.Application.Enums;
 using FlowSync.Application.Models;
+using FlowSync.Contracts.Enums;
 using FlowSync.Contracts.Responses;
 
 namespace FlowSync.Mapping

@@ -9,11 +9,11 @@ using Microsoft.AspNetCore.Mvc;
 namespace FlowSync.Controllers
 {
     [ApiController]
-    public class WorkspacesController : ControllerBase
+    public class WorkspaceController : ControllerBase
     {
         private readonly IWorkspaceService _workspaceService;
 
-        public WorkspacesController(IWorkspaceService workspaceService)
+        public WorkspaceController(IWorkspaceService workspaceService)
         {
             _workspaceService = workspaceService;
         }
@@ -54,7 +54,7 @@ namespace FlowSync.Controllers
             {
                 Success = true,
                 Message = "Workspace Fetched Successfully.",
-                Data = result.MapToWorkspaceResponse()
+                Data = result?.MapToWorkspaceResponse()
             });
         }
 

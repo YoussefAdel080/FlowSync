@@ -17,9 +17,9 @@ namespace FlowSync.Application.Services
         public WorkspaceService(IWorkspaceRepository workspaceRepository, IValidator<CreateWorkspaceRequest> createWorkspaceValidator, IValidator<UpdateWorkspaceRequest> updateWorkspaceValidator, IWorkspaceAuthorizationService workspaceAuthorizationService, IValidator<DeleteWorkspaceRequest> deleteWorkspaceValidator)
         {
             _workspaceRepository = workspaceRepository;
+            _workspaceAuthorizationService = workspaceAuthorizationService;
             _createWorkspaceValidator = createWorkspaceValidator;
             _updateWorkspaceValidator = updateWorkspaceValidator;
-            _workspaceAuthorizationService = workspaceAuthorizationService;
             _deleteWorkspaceValidator = deleteWorkspaceValidator;
         }
 

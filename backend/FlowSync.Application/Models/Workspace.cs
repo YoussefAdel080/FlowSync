@@ -10,5 +10,6 @@ namespace FlowSync.Application.Models
         public string Description { get; set; }
         public DateTime CreatedAt { get; set; }
         public ICollection<WorkspaceMember> Members { get; set; } = new List<WorkspaceMember>();
+        public ICollection<WorkspaceInvitation> Invitations { get; set; } = new List<WorkspaceInvitation>();
     }
 }

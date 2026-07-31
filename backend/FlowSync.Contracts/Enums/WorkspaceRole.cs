@@ -1,4 +1,4 @@
-﻿namespace FlowSync.Application.Enums
+﻿namespace FlowSync.Contracts.Enums
 {
     public enum WorkspaceRole
     {

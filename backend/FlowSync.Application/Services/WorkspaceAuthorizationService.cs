@@ -2,6 +2,7 @@
 using FlowSync.Application.Enums;
 using FlowSync.Application.Models;
 using FlowSync.Application.Repositories;
+using FlowSync.Contracts.Enums;
 
 namespace FlowSync.Application.Services
 {
@@ -37,7 +38,7 @@ namespace FlowSync.Application.Services
             
             if (ownerMember == null) {return false; }
 
-            return membership.Role == Enums.WorkspaceRole.Admin || (membership.Role == Enums.WorkspaceRole.Owner && ownerMember?.UserId == userId);
+            return membership.Role == WorkspaceRole.Admin || (membership.Role == WorkspaceRole.Owner && ownerMember?.UserId == userId);
         }
         public async Task<bool> CanDelete(Guid workspaceId,CancellationToken token)
         {
@@ -54,8 +55,19 @@ namespace FlowSync.Application.Services
 
             if (ownerMember == null) { return false; }
 
-            return membership.Role == Enums.WorkspaceRole.Owner && ownerMember?.UserId == userId.Value;
+            return membership.Role == WorkspaceRole.Owner && ownerMember?.UserId == userId.Value;
         }
 
+        public async Task<bool> CanInvite(Guid workspaceId, CancellationToken token)
+        {
+            var userId = _currentUserService.UserId;
+            if (userId == null) { return false; }
+            var membership = await _workspaceRepository.GetWorkspaceMembershipAsync(workspaceId, userId.Value, token);
+            if (membership == null) { return false; }
+            var ownerMember = membership.Workspace.Members
+                .FirstOrDefault(m => m.Role == WorkspaceRole.Owner);
+            if (ownerMember == null) { return false; }
+            return membership.Role == WorkspaceRole.Admin || (membership.Role == WorkspaceRole.Owner && ownerMember?.UserId == userId.Value);
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using FlowSync.Application.Contexts;
 using FlowSync.Application.Enums;
 using FlowSync.Application.Models;
+using FlowSync.Contracts.Enums;
 using FlowSync.Contracts.Requests;
 using Microsoft.EntityFrameworkCore;
 
@@ -159,6 +160,16 @@ namespace FlowSync.Application.Repositories
                 .FirstOrDefaultAsync(wm => wm.UserId == userId && wm.WorkspaceId == workspaceId);
 
             return membership;
+        }
+
+        public async Task<bool> IsWorkspaceMemberByEmailAsync(string email, Guid WorksapceId, CancellationToken token)
+        {
+            var membership = await _context.WorkspaceMembers
+                .AsNoTracking()
+                .Include(wm => wm.User)
+                .FirstOrDefaultAsync(wm => wm.User.Email == email && wm.WorkspaceId == WorksapceId, token);
+            
+            return membership != null;
         }
     }
 }
