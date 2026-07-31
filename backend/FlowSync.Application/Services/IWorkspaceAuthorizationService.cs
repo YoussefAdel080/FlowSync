@@ -6,5 +6,6 @@
         Task<bool> CanUpdate(Guid workspaceId, CancellationToken token);
         Task<bool> CanDelete(Guid workspaceId, CancellationToken token);
         Task<bool> CanInvite(Guid workspaceId, CancellationToken token);
+        Task<bool> CanCancelInvitation(Guid workspaceId, CancellationToken token);
     }
 }

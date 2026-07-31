@@ -54,6 +54,7 @@ namespace FlowSync.Controllers
                 Data = true
             });
         }
+
         [Authorize]
         [HttpPut($"{ApiEndpoints.WorkspaceInvitation.Decline}")]
         public async Task<IActionResult> DeclineWorkspaceInvitation([FromBody] DeclineWorkspaceInvitationRequest command, CancellationToken token)
@@ -70,6 +71,26 @@ namespace FlowSync.Controllers
             {
                 Success = true,
                 Message = "Workspace Invitation Declined Successfully.",
+                Data = true
+            });
+        }
+
+        [Authorize]
+        [HttpPut($"{ApiEndpoints.WorkspaceInvitation.Cancel}")]
+        public async Task<IActionResult> CancelWorkspaceInvitation([FromBody] CancelWorkspaceInvitationRequest command, CancellationToken token)
+        {
+            var userId = HttpContext.GetUserId();
+            if (userId is null)
+            {
+                return Unauthorized();
+            }
+
+            var result = await _workspaceInvitationService.CancelWorkspaceInvitationAsync(command, userId.Value, token);
+
+            return Ok(new BaseResponse<bool>
+            {
+                Success = true,
+                Message = "Workspace Invitation Canceled Successfully.",
                 Data = true
             });
         }

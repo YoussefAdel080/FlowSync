@@ -74,6 +74,14 @@ namespace FlowSync.Application.Repositories
             return invitation;
         }
 
+        public async Task<WorkspaceInvitation?> GetWorkspaceInvitationByIdAsync(Guid id, CancellationToken token)
+        {
+            var invitation = await _context.WorkspaceInvitations
+                .AsNoTracking()
+                .FirstOrDefaultAsync(i => i.Id == id, token);
+            return invitation;
+        }
+
         public async Task<bool> AcceptWorkspaceInvitationAsync(AcceptWorkspaceInvitationRequest request, string email, Guid userId, CancellationToken token)
         {
             var invitation = await _context.WorkspaceInvitations
@@ -109,6 +117,22 @@ namespace FlowSync.Application.Repositories
             if (invitation is null) return false;
 
             invitation.Status = Enums.WorkspaceInvitationStatus.Accepted;
+            invitation.UpdatedAt = DateTime.UtcNow;
+
+            _context.WorkspaceInvitations.Update(invitation);
+            _context.SaveChanges();
+
+            return true;
+        }
+
+        public async Task<bool> CancelWorkspaceInvitationAsync(CancelWorkspaceInvitationRequest request, CancellationToken token)
+        {
+            var invitation = await _context.WorkspaceInvitations
+                .FirstOrDefaultAsync(i => i.Id == request.Id, token);
+
+            if (invitation is null) return false;
+
+            invitation.Status = Enums.WorkspaceInvitationStatus.Canceled;
             invitation.UpdatedAt = DateTime.UtcNow;
 
             _context.WorkspaceInvitations.Update(invitation);

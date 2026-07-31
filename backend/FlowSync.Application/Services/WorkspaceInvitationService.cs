@@ -15,7 +15,8 @@ namespace FlowSync.Application.Services
         private readonly IValidator<InviteToWorkspaceRequest> _inviteToWorkspaceValidator;
         private readonly IValidator<AcceptWorkspaceInvitationRequest> _acceptWorkspaceInvitationValidator;
         private readonly IValidator<DeclineWorkspaceInvitationRequest> _declineWorkspaceInvitationValidator;
-        public WorkspaceInvitationService(IWorkspaceInvitationRepository workspaceInvitationRepository, IAuthRepository authRepository, InviteToWorkspaceValidator inviteToWorkspaceValidator, IWorkspaceRepository workspaceRepository, IWorkspaceAuthorizationService workspaceAuthorizationService ,IValidator<AcceptWorkspaceInvitationRequest> acceptWorkspaceInvitationValidator, IValidator<DeclineWorkspaceInvitationRequest> declineWorkspaceInvitationValidator)
+        private readonly IValidator<CancelWorkspaceInvitationRequest> _cancelWorkspaceInvitationValidator;
+        public WorkspaceInvitationService(IWorkspaceInvitationRepository workspaceInvitationRepository, IAuthRepository authRepository, InviteToWorkspaceValidator inviteToWorkspaceValidator, IWorkspaceRepository workspaceRepository, IWorkspaceAuthorizationService workspaceAuthorizationService ,IValidator<AcceptWorkspaceInvitationRequest> acceptWorkspaceInvitationValidator, IValidator<DeclineWorkspaceInvitationRequest> declineWorkspaceInvitationValidator, IValidator<CancelWorkspaceInvitationRequest> cancelWorkspaceInvitationValidator)
         {
             _workspaceInvitationRepository = workspaceInvitationRepository;
             _authRepository = authRepository;
@@ -24,6 +25,7 @@ namespace FlowSync.Application.Services
             _workspaceAuthorizationService = workspaceAuthorizationService;
             _acceptWorkspaceInvitationValidator = acceptWorkspaceInvitationValidator;
             _declineWorkspaceInvitationValidator = declineWorkspaceInvitationValidator;
+            _cancelWorkspaceInvitationValidator = cancelWorkspaceInvitationValidator;
         }
 
         public async Task<bool> CreateWorkspaceInvitationAsync(InviteToWorkspaceRequest request, Guid userId, CancellationToken token)
@@ -121,6 +123,39 @@ namespace FlowSync.Application.Services
             }
 
             return await _workspaceInvitationRepository.DeclineWorkspaceInvitationAsync(request, user.Email, userId, token);
+        }
+
+        public async Task<bool> CancelWorkspaceInvitationAsync(CancelWorkspaceInvitationRequest request, Guid userId, CancellationToken token)
+        {
+            await _cancelWorkspaceInvitationValidator.ValidateAndThrowAsync(request, token);
+
+            var invitation = await _workspaceInvitationRepository.GetWorkspaceInvitationByIdAsync(request.Id, token);
+
+            if (invitation is null)
+            {
+                throw new NotFoundException($"Invitation with id {request.Id} does not exist.");
+            }
+
+            var user = await _authRepository.GetUserByIdAsync(userId, token);
+
+            if (user is null)
+            {
+                throw new NotFoundException($"User with ID {userId} does not exist.");
+            }
+
+            var canInvite = await _workspaceAuthorizationService.CanCancelInvitation(invitation.WorkspaceId ,token);
+
+            if (!canInvite)
+            {
+                throw new UnauthorizedException("User is not allowed to invite users to the requested workspace.");
+            }
+
+            if (invitation.Status != Enums.WorkspaceInvitationStatus.Pending)
+            {
+                throw new BadRequestException($"Invitation is expired or got accepted/declined.");
+            }
+                
+            return await _workspaceInvitationRepository.CancelWorkspaceInvitationAsync(request, token);
         }
     }
 }

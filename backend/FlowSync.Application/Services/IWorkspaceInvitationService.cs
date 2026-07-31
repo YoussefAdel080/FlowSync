@@ -7,5 +7,6 @@ namespace FlowSync.Application.Services
         Task<bool> CreateWorkspaceInvitationAsync(InviteToWorkspaceRequest requset, Guid userId, CancellationToken token);
         Task<bool> AcceptWorkspaceInvitationAsync(AcceptWorkspaceInvitationRequest request, Guid userId, CancellationToken token);
         Task<bool> DeclineWorkspaceInvitationAsync(DeclineWorkspaceInvitationRequest request, Guid userId, CancellationToken token);
+        Task<bool> CancelWorkspaceInvitationAsync(CancelWorkspaceInvitationRequest request, Guid userId, CancellationToken token);
     }
 }

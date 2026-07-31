@@ -9,6 +9,8 @@ namespace FlowSync.Application.Repositories
         Task<bool> CreateWorkspaceInvitationAsync(InviteToWorkspaceRequest request, Guid invitedByUserId, CancellationToken token);
         Task<bool> AcceptWorkspaceInvitationAsync(AcceptWorkspaceInvitationRequest request, string email, Guid userId, CancellationToken token);
         Task<bool> DeclineWorkspaceInvitationAsync(DeclineWorkspaceInvitationRequest request, string email, Guid userId, CancellationToken token);
+        Task<bool> CancelWorkspaceInvitationAsync(CancelWorkspaceInvitationRequest request, CancellationToken token);
         Task<WorkspaceInvitation?> GetWorkspaceInvitationByTokenAndEmailAsync(string InvitationToken, string email, CancellationToken token);
+        Task<WorkspaceInvitation?> GetWorkspaceInvitationByIdAsync(Guid id, CancellationToken token);
     }
 }
