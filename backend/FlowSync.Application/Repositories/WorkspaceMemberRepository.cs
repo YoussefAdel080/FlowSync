@@ -17,12 +17,12 @@ namespace FlowSync.Application.Repositories
             _context = context;
         }
 
-        public async Task<PaginationResult<WorkspaceMember>> GetWorkspaceMembersAsync(Guid WorkspaceId, GetWorkspaceMembersRequest request, CancellationToken token)
+        public async Task<PaginationResult<WorkspaceMember>> GetWorkspaceMembersAsync(Guid workspaceId, GetWorkspaceMembersRequest request, CancellationToken token)
         {
             var query = _context.WorkspaceMembers
                 .AsNoTracking()
                 .AsQueryable()
-                .Where(wm => wm.WorkspaceId == WorkspaceId);
+                .Where(wm => wm.WorkspaceId == workspaceId);
             
             //Filtering
             if (!string.IsNullOrEmpty(request.MemberName))
@@ -99,6 +99,19 @@ namespace FlowSync.Application.Repositories
                 PageSize = request.PageSize
             };
 
+        }
+
+        public async Task<bool> ChangeWorkspaceMemberRoleAsync(Guid workspaceId, Guid userId, ChangeWorkspaceMemberRoleRequest request, CancellationToken token)
+        {
+            var member = await _context.WorkspaceMembers.FirstOrDefaultAsync(w => w.Id == workspaceId && w.UserId == request.Id, token);
+
+            if (member is null) return false;
+
+            member.Role = (WorkspaceRole)request.Role;
+
+            await _context.SaveChangesAsync();
+
+            return true;
         }
     }
 }

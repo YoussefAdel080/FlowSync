@@ -19,9 +19,9 @@ namespace FlowSync.Controllers
 
         [Authorize]
         [HttpGet($"{ApiEndpoints.WorkspaceMembers.GetWorkspaceMembers}")]
-        public async Task<IActionResult> GetWorkspaceMembers([FromRoute] Guid WorkspaceId,[FromQuery] GetWorkspaceMembersRequest command, CancellationToken token)
+        public async Task<IActionResult> GetWorkspaceMembers([FromRoute] Guid workspaceId,[FromQuery] GetWorkspaceMembersRequest command, CancellationToken token)
         {
-            var members = await _workspaceMemberService.GetWorkspaceMembersAsync(WorkspaceId ,command, token);
+            var members = await _workspaceMemberService.GetWorkspaceMembersAsync(workspaceId ,command, token);
 
             return Ok(new PaginationResponse<WorkspaceMemberResponse>()
             {
@@ -34,5 +34,20 @@ namespace FlowSync.Controllers
                 TotalPages = members.TotalPages,
             });
         }
+
+        [Authorize]
+        [HttpPut($"{ApiEndpoints.WorkspaceMembers.ChangeRole}")]
+        public async Task<IActionResult> ChangeWorkspaceMemberRole([FromRoute] Guid workspaceId, [FromQuery] ChangeWorkspaceMemberRoleRequest command, CancellationToken token)
+        {
+            var result = await _workspaceMemberService.ChangeWorkspaceMemberRoleAsync(workspaceId ,command, token);
+
+            return Ok(new BaseResponse<bool>
+            {
+                Success = true,
+                Message = "Role Changed Successfully.",
+                Data = result
+            });
+        }
+
     }
 }

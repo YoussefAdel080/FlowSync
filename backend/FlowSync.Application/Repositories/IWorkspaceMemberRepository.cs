@@ -6,6 +6,7 @@ namespace FlowSync.Application.Repositories
 {
     public interface IWorkspaceMemberRepository
     {
-        Task<PaginationResult<WorkspaceMember>> GetWorkspaceMembersAsync(Guid WorkspaceId, GetWorkspaceMembersRequest request, CancellationToken token);
+        Task<PaginationResult<WorkspaceMember>> GetWorkspaceMembersAsync(Guid workspaceId, GetWorkspaceMembersRequest request, CancellationToken token);
+        Task<bool> ChangeWorkspaceMemberRoleAsync(Guid workspaceId,Guid userId , ChangeWorkspaceMemberRoleRequest request, CancellationToken token);
     }
 }

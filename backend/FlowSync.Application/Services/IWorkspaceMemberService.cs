@@ -7,5 +7,6 @@ namespace FlowSync.Application.Services
     public interface IWorkspaceMemberService
     {
         Task<PaginationResult<WorkspaceMember>> GetWorkspaceMembersAsync(Guid WorkspaceId ,GetWorkspaceMembersRequest request ,CancellationToken token);
+        Task<bool> ChangeWorkspaceMemberRoleAsync(Guid workspaceId, ChangeWorkspaceMemberRoleRequest request, CancellationToken token);
     }
 }

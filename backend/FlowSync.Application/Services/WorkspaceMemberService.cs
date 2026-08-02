@@ -2,6 +2,7 @@
 using FlowSync.Application.Exceptions;
 using FlowSync.Application.Models;
 using FlowSync.Application.Repositories;
+using FlowSync.Contracts.Enums;
 using FlowSync.Contracts.Requests;
 using FluentValidation;
 
@@ -11,19 +12,28 @@ namespace FlowSync.Application.Services
     {
         private readonly IWorkspaceMemberRepository _workspaceMemberRepository;
         private readonly IWorkspaceRepository _workspaceRepository;
+        private readonly IWorkspaceAuthorizationService _workspaceAuthorizationService;
+        private readonly ICurrentUserService _currentUserService;
         private readonly IValidator<GetWorkspaceMembersRequest> _getWorkspaceMembersValidator;
+        private readonly IValidator<ChangeWorkspaceMemberRoleRequest> _changeWorkspaceMemberRoleValidator;
         private readonly IValidator<PaginationRequest> _paginationValidator;
 
         public WorkspaceMemberService(
             IWorkspaceMemberRepository workspaceMemberRepository,
             IValidator<GetWorkspaceMembersRequest> getWorkspaceMembersValidator,
             IValidator<PaginationRequest> paginationValidator,
-            IWorkspaceRepository workspaceRepository)
+            IWorkspaceRepository workspaceRepository,
+            IValidator<ChangeWorkspaceMemberRoleRequest> changeWorkspaceMemberRoleValidator,
+            IWorkspaceAuthorizationService workspaceAuthorizationService,
+            ICurrentUserService currentUserService)
         {
             _workspaceMemberRepository = workspaceMemberRepository;
             _getWorkspaceMembersValidator = getWorkspaceMembersValidator;
             _paginationValidator = paginationValidator;
             _workspaceRepository = workspaceRepository;
+            _changeWorkspaceMemberRoleValidator = changeWorkspaceMemberRoleValidator;
+            _workspaceAuthorizationService = workspaceAuthorizationService;
+            _currentUserService = currentUserService;
         }
 
         public async Task<PaginationResult<WorkspaceMember>> GetWorkspaceMembersAsync(Guid WorkspaceId, GetWorkspaceMembersRequest request, CancellationToken token)
@@ -39,6 +49,57 @@ namespace FlowSync.Application.Services
             }
 
             return await _workspaceMemberRepository.GetWorkspaceMembersAsync(WorkspaceId ,request, token);
+        }
+
+        public async Task<bool> ChangeWorkspaceMemberRoleAsync(Guid workspaceId, ChangeWorkspaceMemberRoleRequest request, CancellationToken token)
+        {
+            await _changeWorkspaceMemberRoleValidator.ValidateAndThrowAsync(request, token);
+
+            var workspace = await _workspaceRepository.GetWorkspaceByIdAsync(workspaceId, token);
+
+            if (workspace is null)
+            {
+                throw new NotFoundException($"Workspace with ID {workspaceId} does not exist.");
+            }
+
+            var canChangeRole = await _workspaceAuthorizationService.CanChangeRole(workspaceId, token);
+            if (!canChangeRole)
+            {
+                throw new UnauthorizedException("User is not allowed to change role of the request workspace member.");
+            }
+
+            var userId = _currentUserService.UserId;
+            
+            // user can not change his role.
+            if (userId.Value == request.Id) {
+                throw new BadRequestException("User can not change his own role.");
+            }
+            
+            var requestedMember = await _workspaceRepository.GetWorkspaceMembershipAsync(workspaceId, request.Id, token);
+            
+            if(requestedMember is null){
+                throw new NotFoundException("The requestd member is not a member of the requested worksapce.");
+            }
+
+            if(requestedMember.Role == (WorkspaceRole)AllowedWorkspaceRole.Admin){
+                throw new BadRequestException("Can not change owner's role.");
+            }
+
+            if(requestedMember.Role == (WorkspaceRole)request.Role){
+                throw new BadRequestException("The requested role is the same as the requested member's current role.");
+            }
+
+            var currentUserMemberShip = await _workspaceRepository.GetWorkspaceMembershipAsync(workspaceId, userId.Value, token);
+
+            if (currentUserMemberShip is not null && currentUserMemberShip.Role == WorkspaceRole.Admin) {
+
+                if (!(requestedMember.Role == WorkspaceRole.Member || requestedMember.Role == WorkspaceRole.Guest))
+                {
+                    throw new UnauthorizedException("Admins can only change the role of a guest or member within the a workspace.");
+                }
+            }
+
+            return await _workspaceMemberRepository.ChangeWorkspaceMemberRoleAsync(workspaceId, userId.Value, request, token);
         }
     }
 }
