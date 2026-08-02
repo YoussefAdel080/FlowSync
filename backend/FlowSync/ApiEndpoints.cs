@@ -37,5 +37,10 @@
             public const string Decline = $"{Base}/Decline";
             public const string Cancel = $"{Base}/Cancel";
         }
+        public static class WorkspaceMembers
+        {
+            private const string Base = $"{ApiBase}/{{WorkspaceId:guid}}/WorkspaceMembers";
+            public const string GetWorkspaceMembers = $"{Base}";
+        }
     }
 }

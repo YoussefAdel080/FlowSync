@@ -1,4 +1,6 @@
-﻿namespace FlowSync.Application.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace FlowSync.Application.Models
 {
     public class User
     {
@@ -10,5 +12,7 @@
         public bool IsEmailVerified { get; set; }
         public ICollection<WorkspaceMember> WorkspaceMemberships { get; set; }
         public ICollection<WorkspaceInvitation> WorkspaceInvitations { get; set; }
+        [NotMapped]
+        public string DisplayName => $"{FirstName} {LastName}";
     }
 }
