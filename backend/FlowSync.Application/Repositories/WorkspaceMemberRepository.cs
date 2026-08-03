@@ -103,7 +103,7 @@ namespace FlowSync.Application.Repositories
 
         public async Task<bool> ChangeWorkspaceMemberRoleAsync(Guid workspaceId, Guid userId, ChangeWorkspaceMemberRoleRequest request, CancellationToken token)
         {
-            var member = await _context.WorkspaceMembers.FirstOrDefaultAsync(w => w.Id == workspaceId && w.UserId == request.Id, token);
+            var member = await _context.WorkspaceMembers.FirstOrDefaultAsync(w => w.WorkspaceId == workspaceId && w.Id == request.Id, token);
 
             if (member is null) return false;
 

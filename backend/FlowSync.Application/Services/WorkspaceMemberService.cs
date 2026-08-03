@@ -65,7 +65,7 @@ namespace FlowSync.Application.Services
             var canChangeRole = await _workspaceAuthorizationService.CanChangeRole(workspaceId, token);
             if (!canChangeRole)
             {
-                throw new UnauthorizedException("User is not allowed to change role of the request workspace member.");
+                throw new UnauthorizedException("User is not allowed to change role of the requested workspace member.");
             }
 
             var userId = _currentUserService.UserId;
@@ -78,7 +78,7 @@ namespace FlowSync.Application.Services
             var requestedMember = await _workspaceRepository.GetWorkspaceMembershipAsync(workspaceId, request.Id, token);
             
             if(requestedMember is null){
-                throw new NotFoundException("The requestd member is not a member of the requested worksapce.");
+                throw new NotFoundException("The requested member is not a member of the requested worksapce.");
             }
 
             if(requestedMember.Role == (WorkspaceRole)AllowedWorkspaceRole.Admin){
