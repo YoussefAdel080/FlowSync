@@ -16,6 +16,7 @@ namespace FlowSync.Application.Services
         private readonly ICurrentUserService _currentUserService;
         private readonly IValidator<GetWorkspaceMembersRequest> _getWorkspaceMembersValidator;
         private readonly IValidator<ChangeWorkspaceMemberRoleRequest> _changeWorkspaceMemberRoleValidator;
+        private readonly IValidator<RemoveWorkspaceMemberRequest> _removeWorkspaceMemberValidator;
         private readonly IValidator<PaginationRequest> _paginationValidator;
 
         public WorkspaceMemberService(
@@ -25,7 +26,8 @@ namespace FlowSync.Application.Services
             IWorkspaceRepository workspaceRepository,
             IValidator<ChangeWorkspaceMemberRoleRequest> changeWorkspaceMemberRoleValidator,
             IWorkspaceAuthorizationService workspaceAuthorizationService,
-            ICurrentUserService currentUserService)
+            ICurrentUserService currentUserService,
+            IValidator<RemoveWorkspaceMemberRequest> removeWorkspaceMemberValidator)
         {
             _workspaceMemberRepository = workspaceMemberRepository;
             _getWorkspaceMembersValidator = getWorkspaceMembersValidator;
@@ -34,6 +36,7 @@ namespace FlowSync.Application.Services
             _changeWorkspaceMemberRoleValidator = changeWorkspaceMemberRoleValidator;
             _workspaceAuthorizationService = workspaceAuthorizationService;
             _currentUserService = currentUserService;
+            _removeWorkspaceMemberValidator = removeWorkspaceMemberValidator;
         }
 
         public async Task<PaginationResult<WorkspaceMember>> GetWorkspaceMembersAsync(Guid WorkspaceId, GetWorkspaceMembersRequest request, CancellationToken token)
@@ -91,7 +94,11 @@ namespace FlowSync.Application.Services
 
             var currentUserMemberShip = await _workspaceRepository.GetWorkspaceMembershipAsync(workspaceId, userId.Value, token);
 
-            if (currentUserMemberShip is not null && currentUserMemberShip.Role == WorkspaceRole.Admin) {
+            if (currentUserMemberShip is null) {
+                throw new NotFoundException("User is not a member of the requested worksapce.");
+            }
+
+            if (currentUserMemberShip.Role == WorkspaceRole.Admin) {
 
                 if (!(requestedMember.Role == WorkspaceRole.Member || requestedMember.Role == WorkspaceRole.Guest))
                 {
@@ -99,7 +106,64 @@ namespace FlowSync.Application.Services
                 }
             }
 
-            return await _workspaceMemberRepository.ChangeWorkspaceMemberRoleAsync(workspaceId, userId.Value, request, token);
+            return await _workspaceMemberRepository.ChangeWorkspaceMemberRoleAsync(workspaceId, request, token);
+        }
+
+        public async Task<bool> RemoveWorkspaceMemberAsync(Guid workspaceId, RemoveWorkspaceMemberRequest request, CancellationToken token)
+        {
+            await _removeWorkspaceMemberValidator.ValidateAndThrowAsync(request, token);
+
+            var workspace = await _workspaceRepository.GetWorkspaceByIdAsync(workspaceId, token);
+
+            if (workspace is null)
+            {
+                throw new NotFoundException($"Workspace with ID {workspaceId} does not exist.");
+            }
+
+            var canRemoveMember = await _workspaceAuthorizationService.CanRemoveWorkspaceMember(workspaceId, token);
+            if (!canRemoveMember)
+            {
+                throw new UnauthorizedException("User is not allowed to reomve the requested workspace member.");
+            }
+
+            var userId = _currentUserService.UserId;
+
+            // user can not remove himself.
+            if (userId.Value == request.Id)
+            {
+                throw new BadRequestException("User cannot remove themselves from the workspace.");
+            }
+
+            var currentUserMemberShip = await _workspaceRepository.GetWorkspaceMembershipAsync(workspaceId, userId.Value, token);
+
+            if (currentUserMemberShip is null) {
+                throw new NotFoundException("User is not a member of the requested worksapce.");
+            }
+
+            var requestedMember = await _workspaceRepository.GetWorkspaceMembershipAsync(workspaceId, request.Id, token);
+
+            if (requestedMember is null)
+            {
+                throw new NotFoundException("The requested member is not a member of the requested worksapce.");
+            }
+
+            // can't remove workspace owner.
+            if (requestedMember.Role == WorkspaceRole.Owner)
+            {
+                throw new BadRequestException("can not remove workspace's owner.");
+            }
+
+
+            if (currentUserMemberShip.Role == WorkspaceRole.Admin)
+            {
+
+                if (!(requestedMember.Role == WorkspaceRole.Member || requestedMember.Role == WorkspaceRole.Guest))
+                {
+                    throw new UnauthorizedException("Admins can only remove a guest or member within the a workspace.");
+                }
+            }
+
+            return await _workspaceMemberRepository.RemoveWorkspaceMemberAsync(workspaceId, request, token);
         }
     }
 }

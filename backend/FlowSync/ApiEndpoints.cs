@@ -42,6 +42,7 @@
             private const string Base = $"{ApiBase}/{{workspaceId:guid}}/workspace-member";
             public const string GetWorkspaceMembers = $"{Base}";
             public const string ChangeRole = $"{Base}/change-role";
+            public const string Remove = $"{Base}/remove";
         }
     }
 }

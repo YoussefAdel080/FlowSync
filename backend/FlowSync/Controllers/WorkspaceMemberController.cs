@@ -49,5 +49,19 @@ namespace FlowSync.Controllers
             });
         }
 
+        [Authorize]
+        [HttpDelete($"{ApiEndpoints.WorkspaceMembers.Remove}")]
+        public async Task<IActionResult> RemoveWorkspaceMember([FromRoute] Guid workspaceId, [FromQuery] RemoveWorkspaceMemberRequest command, CancellationToken token)
+        {
+            var result = await _workspaceMemberService.RemoveWorkspaceMemberAsync(workspaceId ,command, token);
+
+            return Ok(new BaseResponse<bool>
+            {
+                Success = true,
+                Message = "Member Removed Successfully.",
+                Data = result
+            });
+        }
+
     }
 }

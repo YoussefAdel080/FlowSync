@@ -101,7 +101,7 @@ namespace FlowSync.Application.Repositories
 
         }
 
-        public async Task<bool> ChangeWorkspaceMemberRoleAsync(Guid workspaceId, Guid userId, ChangeWorkspaceMemberRoleRequest request, CancellationToken token)
+        public async Task<bool> ChangeWorkspaceMemberRoleAsync(Guid workspaceId, ChangeWorkspaceMemberRoleRequest request, CancellationToken token)
         {
             var member = await _context.WorkspaceMembers.FirstOrDefaultAsync(w => w.WorkspaceId == workspaceId && w.Id == request.Id, token);
 
@@ -112,6 +112,15 @@ namespace FlowSync.Application.Repositories
             await _context.SaveChangesAsync();
 
             return true;
+        }
+
+        public async Task<bool> RemoveWorkspaceMemberAsync(Guid workspaceId, RemoveWorkspaceMemberRequest request, CancellationToken token)
+        {
+            var affectedRows = await _context.WorkspaceMembers
+                .Where(wm => wm.WorkspaceId == workspaceId && wm.Id == request.Id)
+                .ExecuteDeleteAsync(token);
+
+            return affectedRows > 0;
         }
     }
 }
