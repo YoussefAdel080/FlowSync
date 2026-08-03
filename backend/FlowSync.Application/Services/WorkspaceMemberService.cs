@@ -165,5 +165,32 @@ namespace FlowSync.Application.Services
 
             return await _workspaceMemberRepository.RemoveWorkspaceMemberAsync(workspaceId, request, token);
         }
+
+        public async Task<bool> LeaveWorkspaceAsync(Guid workspaceId, CancellationToken token)
+        {
+            var workspace = await _workspaceRepository.GetWorkspaceByIdAsync(workspaceId, token);
+
+            if (workspace is null)
+            {
+                throw new NotFoundException($"Workspace with ID {workspaceId} does not exist.");
+            }
+
+            var canLeaveWorkspace = await _workspaceAuthorizationService.CanLeaveWorkspace(workspaceId, token);
+            if (!canLeaveWorkspace)
+            {
+                throw new BadRequestException("Owner can not leave a workspace until ownership is transfered.");
+            }
+
+            var userId = _currentUserService.UserId;
+
+            var currentUserMemberShip = await _workspaceRepository.GetWorkspaceMembershipAsync(workspaceId, userId.Value, token);
+
+            if (currentUserMemberShip is null)
+            {
+                throw new NotFoundException("User is not a member of the requested worksapce.");
+            }
+
+            return await _workspaceMemberRepository.LeaveWorkspaceAsync(workspaceId, userId.Value, token);
+        }
     }
 }

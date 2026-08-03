@@ -9,5 +9,6 @@ namespace FlowSync.Application.Services
         Task<PaginationResult<WorkspaceMember>> GetWorkspaceMembersAsync(Guid WorkspaceId ,GetWorkspaceMembersRequest request ,CancellationToken token);
         Task<bool> ChangeWorkspaceMemberRoleAsync(Guid workspaceId, ChangeWorkspaceMemberRoleRequest request, CancellationToken token);
         Task<bool> RemoveWorkspaceMemberAsync(Guid workspaceId, RemoveWorkspaceMemberRequest request, CancellationToken token);
+        Task<bool> LeaveWorkspaceAsync(Guid workspaceId, CancellationToken token);
     }
 }

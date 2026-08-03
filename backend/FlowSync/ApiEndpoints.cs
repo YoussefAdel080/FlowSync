@@ -43,6 +43,7 @@
             public const string GetWorkspaceMembers = $"{Base}";
             public const string ChangeRole = $"{Base}/change-role";
             public const string Remove = $"{Base}/remove";
+            public const string Leave = $"{Base}/leave";
         }
     }
 }

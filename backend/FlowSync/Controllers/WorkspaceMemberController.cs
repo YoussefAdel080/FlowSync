@@ -63,5 +63,18 @@ namespace FlowSync.Controllers
             });
         }
 
+        [Authorize]
+        [HttpDelete($"{ApiEndpoints.WorkspaceMembers.Leave}")]
+        public async Task<IActionResult> LeaveWorkspace([FromRoute] Guid workspaceId, CancellationToken token)
+        {
+            var result = await _workspaceMemberService.LeaveWorkspaceAsync(workspaceId, token);
+
+            return Ok(new BaseResponse<bool>
+            {
+                Success = true,
+                Message = "Workspace left successfully, you are no longer a member of the requested workspace.",
+                Data = result
+            });
+        }
     }
 }

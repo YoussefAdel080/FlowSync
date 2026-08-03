@@ -122,5 +122,14 @@ namespace FlowSync.Application.Repositories
 
             return affectedRows > 0;
         }
+
+        public async Task<bool> LeaveWorkspaceAsync(Guid workspaceId, Guid userId, CancellationToken token)
+        {
+            var affectedRows = await _context.WorkspaceMembers
+                .Where(wm => wm.WorkspaceId == workspaceId && wm.UserId == userId)
+                .ExecuteDeleteAsync(token);
+
+            return affectedRows > 0;
+        }
     }
 }
