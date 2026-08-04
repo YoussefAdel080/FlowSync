@@ -37,9 +37,9 @@ namespace FlowSync.Controllers
 
         [Authorize]
         [HttpPut($"{ApiEndpoints.WorkspaceMembers.ChangeRole}")]
-        public async Task<IActionResult> ChangeWorkspaceMemberRole([FromRoute] Guid workspaceId, [FromQuery] ChangeWorkspaceMemberRoleRequest command, CancellationToken token)
+        public async Task<IActionResult> ChangeWorkspaceMemberRole([FromRoute] Guid workspaceId, [FromRoute] Guid memberId, [FromBody] ChangeWorkspaceMemberRoleRequest command, CancellationToken token)
         {
-            var result = await _workspaceMemberService.ChangeWorkspaceMemberRoleAsync(workspaceId ,command, token);
+            var result = await _workspaceMemberService.ChangeWorkspaceMemberRoleAsync(workspaceId ,memberId ,command, token);
 
             return Ok(new BaseResponse<bool>
             {
@@ -51,9 +51,9 @@ namespace FlowSync.Controllers
 
         [Authorize]
         [HttpDelete($"{ApiEndpoints.WorkspaceMembers.Remove}")]
-        public async Task<IActionResult> RemoveWorkspaceMember([FromRoute] Guid workspaceId, [FromQuery] RemoveWorkspaceMemberRequest command, CancellationToken token)
+        public async Task<IActionResult> RemoveWorkspaceMember([FromRoute] Guid workspaceId, [FromRoute] Guid memberId, CancellationToken token)
         {
-            var result = await _workspaceMemberService.RemoveWorkspaceMemberAsync(workspaceId ,command, token);
+            var result = await _workspaceMemberService.RemoveWorkspaceMemberAsync(workspaceId ,memberId, token);
 
             return Ok(new BaseResponse<bool>
             {
