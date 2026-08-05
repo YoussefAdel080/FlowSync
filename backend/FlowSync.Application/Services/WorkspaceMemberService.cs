@@ -75,7 +75,7 @@ namespace FlowSync.Application.Services
                 throw new BadRequestException("User can not change his own role.");
             }
             
-            var requestedMember = await _workspaceRepository.GetWorkspaceMembershipAsync(workspaceId, memberId, token);
+            var requestedMember = await _workspaceMemberRepository.GetWorkspaceMemberByIdAsync(memberId, token);
             
             if(requestedMember is null){
                 throw new NotFoundException("The requested member is not a member of the requested worksapce.");
@@ -135,7 +135,7 @@ namespace FlowSync.Application.Services
                 throw new NotFoundException("User is not a member of the requested worksapce.");
             }
 
-            var requestedMember = await _workspaceRepository.GetWorkspaceMembershipAsync(workspaceId, memberId, token);
+            var requestedMember = await _workspaceMemberRepository.GetWorkspaceMemberByIdAsync(memberId, token);
 
             if (requestedMember is null)
             {
@@ -186,6 +186,22 @@ namespace FlowSync.Application.Services
             }
 
             return await _workspaceMemberRepository.LeaveWorkspaceAsync(workspaceId, userId.Value, token);
+        }
+
+        public async Task<WorkspaceMember?> GetWorkspaceMemberByIdAsync(Guid WorkspaceId, Guid memberId, CancellationToken token)
+        {
+            var workspace = await _workspaceRepository.GetWorkspaceByIdAsync(WorkspaceId, token);
+
+            if (workspace is null)
+            {
+                throw new NotFoundException($"Workspace with ID {WorkspaceId} does not exist.");
+            }
+
+            var member = await _workspaceMemberRepository.GetWorkspaceMemberByIdAsync(memberId, token);
+
+            if(member is null) throw new NotFoundException($"Member with ID {memberId} does not exist within workspace with ID {WorkspaceId}.");
+
+            return member;
         }
     }
 }

@@ -131,5 +131,17 @@ namespace FlowSync.Application.Repositories
 
             return affectedRows > 0;
         }
+
+        public async Task<WorkspaceMember?> GetWorkspaceMemberByIdAsync(Guid memberId, CancellationToken token)
+        {
+            var member = await _context.WorkspaceMembers
+                .AsNoTracking()
+                .Include(wm => wm.Workspace)
+                    .ThenInclude(w => w.Members)
+                    .ThenInclude(m => m.User)
+                .FirstOrDefaultAsync(wm => wm.Id == memberId);
+
+            return member;
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using FlowSync.Application.Services;
+﻿using FlowSync.Application.Models;
+using FlowSync.Application.Services;
 using FlowSync.Contracts.Requests;
 using FlowSync.Contracts.Responses;
 using FlowSync.Mapping;
@@ -32,6 +33,20 @@ namespace FlowSync.Controllers
                 PageSize = members.PageSize,
                 TotalCount = members.TotalCount,
                 TotalPages = members.TotalPages,
+            });
+        }
+
+        [Authorize]
+        [HttpGet($"{ApiEndpoints.WorkspaceMembers.GetWorkspaceMember}")]
+        public async Task<IActionResult> GetWorkspaceMember([FromRoute] Guid workspaceId, [FromRoute] Guid memberId, CancellationToken token)
+        {
+            var member = await _workspaceMemberService.GetWorkspaceMemberByIdAsync(workspaceId, memberId, token);
+
+            return Ok(new BaseResponse<WorkspaceMember>()
+            {
+                Success = true,
+                Message = "Workspace members fetched successfully",
+                Data = member
             });
         }
 
