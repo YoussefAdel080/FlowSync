@@ -19,7 +19,6 @@ namespace FlowSync.Application.Repositories
         }
         public async Task<bool> Register(User user, CancellationToken token) {
             await _context.Users.AddAsync(user, token);
-            await _context.SaveChangesAsync(token);
             return true;
         }
 
