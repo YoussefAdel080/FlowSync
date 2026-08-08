@@ -16,13 +16,11 @@ namespace FlowSync.Mapping
                 Id = workspace.Id,
                 Name = workspace.Name,
                 Description = workspace.Description,
-                OwnerId = ownerMember.UserId,
                 CreatedAt = workspace.CreatedAt,
                 Owner = new WorkspaceOwnerResponse
                 {
                     Id = ownerMember.User.Id,
-                    FirstName = ownerMember.User.FirstName,
-                    LastName = ownerMember.User.LastName,
+                    DisplayName = ownerMember.User.DisplayName,
                     Email = ownerMember.User.Email
                 }
             };
