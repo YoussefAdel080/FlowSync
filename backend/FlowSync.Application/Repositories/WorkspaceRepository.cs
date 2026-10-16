@@ -37,8 +37,13 @@ namespace FlowSync.Application.Repositories
 
         public async Task<bool> WorkspaceExistsByNameAsync(string name, Guid userId, CancellationToken token)
         {
-            var workspace = await _context.Workspaces
-                .FirstOrDefaultAsync(w => w.NormalizedName == name, token);
+            var workspace = await _context.WorkspaceMembers
+                .Include(wm => wm.Workspace)
+                .FirstOrDefaultAsync(wm => 
+                    wm.UserId == userId &&
+                    wm.Role == WorkspaceRole.Admin &&
+                    wm.Workspace.Name == name
+                    , token);
 
             return workspace != null;
         }
