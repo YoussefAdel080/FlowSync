@@ -79,19 +79,21 @@ namespace FlowSync.Application.Services
 
         public async Task<Workspace?> GetWorkspaceByIdAsync(Guid id, Guid userId, CancellationToken token)
         {
-            var canView = await _workspaceAuthorizationService.CanView(token);
+            var canView = await _workspaceAuthorizationService.CanView(id, token);
 
             if (!canView)
             {
                 throw new UnauthorizedException("User is not allowed to view the requested workspace."); ;
             }
 
-            var workspace = await _workspaceRepository.GetWorkspaceByIdAsync(id, token);
+            var workspaceExists = await _workspaceRepository.WorkspaceExistsByIdAsync(id, token);
 
-            if (workspace is null)
+            if (!workspaceExists)
             {
                 throw new NotFoundException($"Workspace with ID {id} does not exist.");
             }
+
+            var workspace = await _workspaceRepository.GetWorkspaceByIdAsync(id, token);
 
             return workspace;
         }

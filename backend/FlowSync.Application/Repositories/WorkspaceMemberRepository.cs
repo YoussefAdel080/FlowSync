@@ -143,5 +143,27 @@ namespace FlowSync.Application.Repositories
 
             return member;
         }
+
+        public async Task<WorkspaceRole?> GetWorkspaceMemberRoleAsync(Guid workspaceId, Guid userId, CancellationToken token)
+        {
+            var role = await _context.WorkspaceMembers
+                .AsNoTracking()
+                .Where(wm => wm.UserId == userId && wm.WorkspaceId == workspaceId)
+                .Select(wm => wm.Role)
+                .FirstOrDefaultAsync(token);
+
+            return role;
+        }
+
+        public async Task<WorkspaceRole?> GetWorkspaceMemberRoleAsync(Guid memberId, CancellationToken token)
+        {
+            var role = await _context.WorkspaceMembers
+                .AsNoTracking()
+                .Where(wm => wm.Id == memberId)
+                .Select(wm => wm.Role)
+                .FirstOrDefaultAsync(token);
+
+            return role;
+        }
     }
 }

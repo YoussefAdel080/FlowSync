@@ -89,13 +89,13 @@ namespace FlowSync.Application.Services
                 throw new BadRequestException("The requested role is the same as the requested member's current role.");
             }
 
-            var currentUserMemberShip = await _workspaceRepository.GetWorkspaceMembershipAsync(workspaceId, userId.Value, token);
+            var memberRole = await _workspaceMemberRepository.GetWorkspaceMemberRoleAsync(workspaceId, userId.Value, token);
 
-            if (currentUserMemberShip is null) {
+            if (memberRole is null) {
                 throw new NotFoundException("User is not a member of the requested worksapce.");
             }
 
-            if (currentUserMemberShip.Role == WorkspaceRole.Admin) {
+            if (memberRole == WorkspaceRole.Admin) {
 
                 if (!(requestedMember.Role == WorkspaceRole.Member || requestedMember.Role == WorkspaceRole.Guest))
                 {
@@ -129,9 +129,9 @@ namespace FlowSync.Application.Services
                 throw new BadRequestException("User cannot remove themselves from the workspace.");
             }
 
-            var currentUserMemberShip = await _workspaceRepository.GetWorkspaceMembershipAsync(workspaceId, userId.Value, token);
+            var memberRole = await _workspaceMemberRepository.GetWorkspaceMemberRoleAsync(workspaceId, userId.Value, token);
 
-            if (currentUserMemberShip is null) {
+            if (memberRole is null) {
                 throw new NotFoundException("User is not a member of the requested worksapce.");
             }
 
@@ -149,7 +149,7 @@ namespace FlowSync.Application.Services
             }
 
 
-            if (currentUserMemberShip.Role == WorkspaceRole.Admin)
+            if (memberRole == WorkspaceRole.Admin)
             {
 
                 if (!(requestedMember.Role == WorkspaceRole.Member || requestedMember.Role == WorkspaceRole.Guest))
@@ -178,9 +178,9 @@ namespace FlowSync.Application.Services
 
             var userId = _currentUserService.UserId;
 
-            var currentUserMemberShip = await _workspaceRepository.GetWorkspaceMembershipAsync(workspaceId, userId.Value, token);
+            var memberRole = await _workspaceMemberRepository.GetWorkspaceMemberRoleAsync(workspaceId, userId.Value, token);
 
-            if (currentUserMemberShip is null)
+            if (memberRole is null)
             {
                 throw new NotFoundException("User is not a member of the requested worksapce.");
             }

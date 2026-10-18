@@ -1,7 +1,7 @@
 ﻿using FlowSync.Application.Common.Pagination;
 using FlowSync.Application.Models;
+using FlowSync.Contracts.Enums;
 using FlowSync.Contracts.Requests;
-using Microsoft.EntityFrameworkCore;
 
 namespace FlowSync.Application.Repositories
 {
@@ -12,5 +12,7 @@ namespace FlowSync.Application.Repositories
         Task<bool> RemoveWorkspaceMemberAsync(Guid workspaceId, Guid memberId, CancellationToken token);
         Task<bool> LeaveWorkspaceAsync(Guid workspaceId, Guid userId, CancellationToken token);
         Task<WorkspaceMember?> GetWorkspaceMemberByIdAsync(Guid memberId, CancellationToken token);
+        Task<WorkspaceRole?> GetWorkspaceMemberRoleAsync(Guid workspaceId, Guid userId, CancellationToken token);
+        Task<WorkspaceRole?> GetWorkspaceMemberRoleAsync(Guid memberId, CancellationToken token);
     }
 }

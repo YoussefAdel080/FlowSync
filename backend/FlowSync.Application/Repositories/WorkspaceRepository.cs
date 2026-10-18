@@ -133,6 +133,7 @@ namespace FlowSync.Application.Repositories
             var worksapceMmbership = await _context.WorkspaceMembers
                 .AsNoTracking()
                 .Include(wm => wm.Workspace)
+                .Include(wm => wm.User)
                 .FirstOrDefaultAsync(w => w.WorkspaceId == id, token);
 
             return worksapceMmbership?.Workspace;
@@ -153,18 +154,6 @@ namespace FlowSync.Application.Repositories
             await _context.SaveChangesAsync(token);
 
             return workspaceMembership;
-        }
-
-        public async Task<WorkspaceMember?> GetWorkspaceMembershipAsync(Guid workspaceId, Guid userId, CancellationToken token)
-        {
-            var membership = await _context.WorkspaceMembers
-                .AsNoTracking()
-                .Include(wm => wm.Workspace)
-                    .ThenInclude(w => w.Members)
-                    .ThenInclude(m => m.User)
-                .FirstOrDefaultAsync(wm => wm.UserId == userId && wm.WorkspaceId == workspaceId);
-
-            return membership;
         }
 
         public async Task<bool> IsWorkspaceMemberByEmailAsync(string email, Guid WorksapceId, CancellationToken token)

@@ -32,6 +32,8 @@ namespace FlowSync.Application
             services.AddScoped<IWorkspaceAuthorizationService, WorkspaceAuthorizationService>();
             services.AddScoped<IWorkspaceInvitationRepository, WorkspaceInvitationRepository>();
             services.AddScoped<IWorkspaceInvitationService, WorkspaceInvitationService>();
+            services.AddScoped<IWorkspaceMemberRepository, WorkspaceMemberRepository>();
+            services.AddScoped<IWorkspaceMemberService, WorkspaceMemberService>();
             services.AddScoped<IWorkspaceService, WorkspaceService>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
