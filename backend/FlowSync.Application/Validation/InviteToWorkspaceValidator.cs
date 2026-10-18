@@ -18,9 +18,7 @@ namespace FlowSync.Application.Validation
 
             RuleFor(x => x.Role)
                 .Cascade(CascadeMode.Stop)
-                .NotEmpty().WithMessage("Role is required.")
-                .Must(role => role != WorkspaceRole.Owner)
-                .WithMessage("You cannot invite a user as the workspace owner."); ;
+                .NotEmpty().WithMessage("Role is required.");
         }
     }
 }

@@ -6,6 +6,6 @@ namespace FlowSync.Contracts.Requests
     {
         public Guid WorkspaceId { get; set; }
         public string Email { get; set; }
-        public WorkspaceRole Role { get; set; }
+        public AllowedWorkspaceRole Role { get; set; }
     }
 }

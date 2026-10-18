@@ -48,7 +48,7 @@ namespace FlowSync.Application.Repositories
                 Id = Guid.NewGuid(),
                 WorkspaceId = request.WorkspaceId,
                 Email = request.Email,
-                Role = request.Role,
+                Role = (WorkspaceRole) request.Role,
                 Token = invitationToken,
                 Status = Enums.WorkspaceInvitationStatus.Pending,
                 InvitedById = invitedByUserId,
@@ -154,7 +154,7 @@ namespace FlowSync.Application.Repositories
             return invitations;
         }
 
-        private async Task<bool> sendInvitationEmail(string email, string invitationToken, WorkspaceRole role, string workspaceName, string senderName, CancellationToken token)
+        private async Task<bool> sendInvitationEmail(string email, string invitationToken, AllowedWorkspaceRole role, string workspaceName, string senderName, CancellationToken token)
         {
             var message = new MimeMessage();
 
