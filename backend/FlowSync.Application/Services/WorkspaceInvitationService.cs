@@ -53,7 +53,7 @@ namespace FlowSync.Application.Services
             // user cannot invite himself to the workspace
             var user = await _authRepository.GetUserByIdAsync(userId, token);
 
-            if (user is not null && user.Email != request.Email)
+            if (user is not null && user.Email == request.Email)
             {
                 throw new BadRequestException("User is not allowed to invite himself.");
             }
