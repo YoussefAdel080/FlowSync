@@ -2,6 +2,7 @@
 using FlowSync.Application.Services;
 using FlowSync.Auth;
 using FlowSync.Contracts.Requests;
+using FlowSync.Contracts.Responses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,7 +30,7 @@ namespace FlowSync.Controllers
 
             var result = await _workspaceInvitationService.GetPendingWorkspaceInvitationsAsync(command, userId.Value, token);
 
-            return Ok(new BaseResponse<IEnumerable<WorkspaceInvitation>>
+            return Ok(new BaseResponse<IEnumerable<WorkspaceInvitationResponse>>
             {
                 Success = true,
                 Message = "Pending Workspace Invitations Fetched Successfully.",

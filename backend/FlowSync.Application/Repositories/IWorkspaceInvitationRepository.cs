@@ -1,5 +1,6 @@
 ﻿using FlowSync.Application.Models;
 using FlowSync.Contracts.Requests;
+using FlowSync.Contracts.Responses;
 
 namespace FlowSync.Application.Repositories
 {
@@ -12,6 +13,6 @@ namespace FlowSync.Application.Repositories
         Task<bool> CancelWorkspaceInvitationAsync(CancelWorkspaceInvitationRequest request, CancellationToken token);
         Task<WorkspaceInvitation?> GetWorkspaceInvitationByTokenAndEmailAsync(string InvitationToken, string email, CancellationToken token);
         Task<WorkspaceInvitation?> GetWorkspaceInvitationByIdAsync(Guid id, CancellationToken token);
-        Task<IEnumerable<WorkspaceInvitation>> GetPendingWorkspaceInvitationsAsync(GetPendingWorkspaceInvitationsRequest request, CancellationToken token);
+        Task<IEnumerable<WorkspaceInvitationResponse>> GetPendingWorkspaceInvitationsAsync(GetPendingWorkspaceInvitationsRequest request, CancellationToken token);
     }
 }

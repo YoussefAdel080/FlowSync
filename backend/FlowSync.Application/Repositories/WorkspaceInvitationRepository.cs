@@ -1,9 +1,9 @@
 ﻿using FlowSync.Application.Configuration;
 using FlowSync.Application.Contexts;
-using FlowSync.Application.Enums;
 using FlowSync.Application.Models;
 using FlowSync.Contracts.Enums;
 using FlowSync.Contracts.Requests;
+using FlowSync.Contracts.Responses;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.EntityFrameworkCore;
@@ -48,9 +48,9 @@ namespace FlowSync.Application.Repositories
                 Id = Guid.NewGuid(),
                 WorkspaceId = request.WorkspaceId,
                 Email = request.Email,
-                Role = (WorkspaceRole) request.Role,
+                Role = request.Role,
                 Token = invitationToken,
-                Status = Enums.WorkspaceInvitationStatus.Pending,
+                Status = WorkspaceInvitationStatus.Pending,
                 InvitedById = invitedByUserId,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
@@ -90,7 +90,7 @@ namespace FlowSync.Application.Repositories
 
             if(invitation is null) return false;
 
-            invitation.Status = Enums.WorkspaceInvitationStatus.Accepted;
+            invitation.Status = WorkspaceInvitationStatus.Accepted;
             invitation.UpdatedAt = DateTime.UtcNow;
 
             _context.WorkspaceInvitations.Update(invitation);
@@ -100,7 +100,7 @@ namespace FlowSync.Application.Repositories
                 Id = Guid.NewGuid(),
                 WorkspaceId = invitation.WorkspaceId,
                 UserId = userId,
-                Role = invitation.Role,
+                Role = (WorkspaceRole) invitation.Role,
                 JoinedAt = DateTime.UtcNow,
                 WorkspaceInvitationId = invitation.Id
             };
@@ -117,7 +117,7 @@ namespace FlowSync.Application.Repositories
 
             if (invitation is null) return false;
 
-            invitation.Status = Enums.WorkspaceInvitationStatus.Accepted;
+            invitation.Status = WorkspaceInvitationStatus.Declined;
             invitation.UpdatedAt = DateTime.UtcNow;
 
             _context.WorkspaceInvitations.Update(invitation);
@@ -133,7 +133,7 @@ namespace FlowSync.Application.Repositories
 
             if (invitation is null) return false;
 
-            invitation.Status = Enums.WorkspaceInvitationStatus.Canceled;
+            invitation.Status = WorkspaceInvitationStatus.Canceled;
             invitation.UpdatedAt = DateTime.UtcNow;
 
             _context.WorkspaceInvitations.Update(invitation);
@@ -142,12 +142,42 @@ namespace FlowSync.Application.Repositories
             return true;
         }
 
-        public async Task<IEnumerable<WorkspaceInvitation>> GetPendingWorkspaceInvitationsAsync(GetPendingWorkspaceInvitationsRequest request, CancellationToken token) {
+        public async Task<IEnumerable<WorkspaceInvitationResponse>> GetPendingWorkspaceInvitationsAsync(GetPendingWorkspaceInvitationsRequest request, CancellationToken token) {
             var invitations = await _context.WorkspaceInvitations
                 .AsNoTracking()
                 .Where(i => i.WorkspaceId == request.WorkspaceId && i.Status == WorkspaceInvitationStatus.Pending)
-                .Include(i => i.Workspace)
-                .Include(i => i.InvitedBy)
+                .Select(wi => new WorkspaceInvitationResponse
+                {
+                    Id = wi.Id,
+                    Role = wi.Role,
+                    Email = wi.Email,
+                    Status = WorkspaceInvitationStatus.Pending,
+                    UpdatedAt = wi.UpdatedAt,
+                    CreatedAt = wi.CreatedAt,
+                    ExpiresAt = wi.ExpiresAt,
+                    WorkspaceId = wi.Id,
+                    Workspace = new WorkspaceResponse
+                    {
+                        Id = wi.WorkspaceId,
+                        Name = wi.Workspace.Name,
+                        Description = wi.Workspace.Description,
+                        CreatedAt = wi.Workspace.CreatedAt,
+                        Owner = new WorkspaceOwnerResponse
+                        {
+                            Id = wi.InvitedById,
+                            DisplayName = wi.InvitedBy.DisplayName,
+                            Email = wi.InvitedBy.Email
+                        }
+                    },
+                    InvitedById = wi.InvitedById,
+                    InvitedBy = new InvitedByUserResponse
+                    {
+                        FirstName = wi.InvitedBy.FirstName,
+                        LastName = wi.InvitedBy.LastName,
+                        Email = wi.InvitedBy.Email,
+                        Role = wi.InvitedBy.WorkspaceMemberships.FirstOrDefault(wm => wm.UserId == wi.InvitedById && wm.WorkspaceId == wi.WorkspaceId)!.Role
+                    }
+                })
                 .ToListAsync(token);
 
 

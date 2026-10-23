@@ -1,4 +1,5 @@
 ﻿using FlowSync.Application.Models;
+using FlowSync.Contracts.Enums;
 using FlowSync.Contracts.Responses;
 
 namespace FlowSync.Mapping
@@ -20,7 +21,7 @@ namespace FlowSync.Mapping
                 {
                     Id = member?.WorkspaceInvitation?.InvitedById,
                     DisplayName = member?.WorkspaceInvitation?.InvitedBy.DisplayName,
-                    Role = member?.WorkspaceInvitation?.Role,
+                    Role = (WorkspaceRole) member?.WorkspaceInvitation?.Role,
                     Email = member?.WorkspaceInvitation?.InvitedBy.Email,
                 },
             };

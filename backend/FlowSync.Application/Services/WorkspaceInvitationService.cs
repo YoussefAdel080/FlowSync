@@ -2,9 +2,10 @@
 using FlowSync.Application.Models;
 using FlowSync.Application.Repositories;
 using FlowSync.Application.Validation;
+using FlowSync.Contracts.Enums;
 using FlowSync.Contracts.Requests;
+using FlowSync.Contracts.Responses;
 using FluentValidation;
-using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace FlowSync.Application.Services
 {
@@ -95,9 +96,9 @@ namespace FlowSync.Application.Services
                 throw new NotFoundException($"Invitation with token {request.InvitationToken} does not exist.");
             }
 
-            if(invitation.Status != Enums.WorkspaceInvitationStatus.Pending)
+            if(invitation.Status != WorkspaceInvitationStatus.Pending)
             {
-                throw new BadRequestException($"Invitation with token {request.InvitationToken} is expired or got accept/declined.");
+                throw new BadRequestException($"Invitation with token {request.InvitationToken} is expired or got accept/declined/cancled.");
             }
 
             return await _workspaceInvitationRepository.AcceptWorkspaceInvitationAsync(request, user.Email, userId, token);
@@ -121,9 +122,9 @@ namespace FlowSync.Application.Services
                 throw new NotFoundException($"Invitation with token {request.InvitationToken} does not exist.");
             }
 
-            if (invitation.Status != Enums.WorkspaceInvitationStatus.Pending)
+            if (invitation.Status != WorkspaceInvitationStatus.Pending)
             {
-                throw new BadRequestException($"Invitation with token {request.InvitationToken} is expired or got accepted/declined.");
+                throw new BadRequestException($"Invitation with token {request.InvitationToken} is expired or got accepted/declined/cancled.");
             }
 
             return await _workspaceInvitationRepository.DeclineWorkspaceInvitationAsync(request, user.Email, userId, token);
@@ -154,7 +155,7 @@ namespace FlowSync.Application.Services
                 throw new UnauthorizedException("User is not allowed to invite users to the requested workspace.");
             }
 
-            if (invitation.Status != Enums.WorkspaceInvitationStatus.Pending)
+            if (invitation.Status != WorkspaceInvitationStatus.Pending)
             {
                 throw new BadRequestException($"Invitation is expired or got accepted/declined.");
             }
@@ -162,7 +163,7 @@ namespace FlowSync.Application.Services
             return await _workspaceInvitationRepository.CancelWorkspaceInvitationAsync(request, token);
         }
 
-        public async Task<IEnumerable<WorkspaceInvitation>> GetPendingWorkspaceInvitationsAsync(GetPendingWorkspaceInvitationsRequest request, Guid userId, CancellationToken token)
+        public async Task<IEnumerable<WorkspaceInvitationResponse>> GetPendingWorkspaceInvitationsAsync(GetPendingWorkspaceInvitationsRequest request, Guid userId, CancellationToken token)
         {
             await _getPendingWorkspaceInvitationsValidator.ValidateAndThrowAsync(request, token);
 

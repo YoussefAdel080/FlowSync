@@ -1,5 +1,4 @@
-﻿using FlowSync.Application.Enums;
-using FlowSync.Contracts.Enums;
+﻿using FlowSync.Contracts.Enums;
 
 namespace FlowSync.Application.Models
 {
@@ -8,7 +7,7 @@ namespace FlowSync.Application.Models
         public Guid Id { get; set; }
         public Guid WorkspaceId { get; set; }
         public Guid InvitedById { get; set; }
-        public WorkspaceRole Role { get; set; }
+        public AllowedWorkspaceRole Role { get; set; }
         public string Email { get; set; }
         public string Token { get; set; }
         public DateTime CreatedAt { get; set; }
