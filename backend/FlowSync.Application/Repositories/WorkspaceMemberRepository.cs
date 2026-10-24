@@ -4,6 +4,7 @@ using FlowSync.Application.Contexts;
 using FlowSync.Application.Models;
 using FlowSync.Contracts.Enums;
 using FlowSync.Contracts.Requests;
+using FlowSync.Contracts.Responses;
 using Microsoft.EntityFrameworkCore;
 
 namespace FlowSync.Application.Repositories
@@ -133,13 +134,29 @@ namespace FlowSync.Application.Repositories
             return affectedRows > 0;
         }
 
-        public async Task<WorkspaceMember?> GetWorkspaceMemberByIdAsync(Guid memberId, CancellationToken token)
+        public async Task<WorkspaceMemberResponse?> GetWorkspaceMemberByIdAsync(Guid memberId, CancellationToken token)
         {
             var member = await _context.WorkspaceMembers
                 .AsNoTracking()
-                .Include(wm => wm.Workspace)
-                    .ThenInclude(w => w.Members)
-                    .ThenInclude(m => m.User)
+                .Select(wm => new WorkspaceMemberResponse
+                {
+                    Id = wm.Id,
+                    Role = wm.Role,
+                    InvitationId = wm.WorkspaceInvitationId,
+                    InvitedBy = wm.WorkspaceInvitation != null 
+                    ? new InvitedByResponse
+                    {
+                        Id = wm.WorkspaceInvitation.InvitedById,
+                        DisplayName = wm.WorkspaceInvitation.InvitedBy.DisplayName,
+                        Email = wm.WorkspaceInvitation.InvitedBy.Email,
+                        // need to be changed to display owner/admin member role
+                        Role = (WorkspaceRole) wm.WorkspaceInvitation.Role
+                    } : null,
+                    UserId = wm.UserId,
+                    DisplayName = wm.User.DisplayName,
+                    Email = wm.User.Email,
+                    JoinedAt = wm.JoinedAt,
+                })
                 .FirstOrDefaultAsync(wm => wm.Id == memberId);
 
             return member;

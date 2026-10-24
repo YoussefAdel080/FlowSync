@@ -4,6 +4,7 @@ using FlowSync.Application.Models;
 using FlowSync.Application.Repositories;
 using FlowSync.Contracts.Enums;
 using FlowSync.Contracts.Requests;
+using FlowSync.Contracts.Responses;
 using FluentValidation;
 
 namespace FlowSync.Application.Services
@@ -70,22 +71,23 @@ namespace FlowSync.Application.Services
 
             var userId = _currentUserService.UserId;
             
-            // user can not change his role.
-            if (userId.Value == memberId) {
-                throw new BadRequestException("User can not change his own role.");
-            }
             
             var requestedMember = await _workspaceMemberRepository.GetWorkspaceMemberByIdAsync(memberId, token);
+            
+            // user can not change his role.
+            if (userId.Value == requestedMember?.UserId) {
+                throw new BadRequestException("User can not change his own role.");
+            }
             
             if(requestedMember is null){
                 throw new NotFoundException("The requested member is not a member of the requested worksapce.");
             }
 
-            if(requestedMember.Role == (WorkspaceRole)AllowedWorkspaceRole.Admin){
+            if(requestedMember.Role == WorkspaceRole.Owner){
                 throw new BadRequestException("Can not change owner's role.");
             }
 
-            if(requestedMember.Role == (WorkspaceRole)request.Role){
+            if(requestedMember.Role == (WorkspaceRole) request.Role){
                 throw new BadRequestException("The requested role is the same as the requested member's current role.");
             }
 
@@ -123,11 +125,6 @@ namespace FlowSync.Application.Services
 
             var userId = _currentUserService.UserId;
 
-            // user can not remove himself.
-            if (userId.Value == memberId)
-            {
-                throw new BadRequestException("User cannot remove themselves from the workspace.");
-            }
 
             var memberRole = await _workspaceMemberRepository.GetWorkspaceMemberRoleAsync(workspaceId, userId.Value, token);
 
@@ -136,11 +133,18 @@ namespace FlowSync.Application.Services
             }
 
             var requestedMember = await _workspaceMemberRepository.GetWorkspaceMemberByIdAsync(memberId, token);
-
+            
             if (requestedMember is null)
             {
                 throw new NotFoundException("The requested member is not a member of the requested worksapce.");
             }
+            
+            // user can not remove himself.
+            if (userId.Value == requestedMember.UserId)
+            {
+                throw new BadRequestException("User cannot remove themselves from the workspace.");
+            }
+
 
             // can't remove workspace owner.
             if (requestedMember.Role == WorkspaceRole.Owner)
@@ -188,7 +192,7 @@ namespace FlowSync.Application.Services
             return await _workspaceMemberRepository.LeaveWorkspaceAsync(workspaceId, userId.Value, token);
         }
 
-        public async Task<WorkspaceMember?> GetWorkspaceMemberByIdAsync(Guid WorkspaceId, Guid memberId, CancellationToken token)
+        public async Task<WorkspaceMemberResponse?> GetWorkspaceMemberByIdAsync(Guid WorkspaceId, Guid memberId, CancellationToken token)
         {
             var workspace = await _workspaceRepository.GetWorkspaceByIdAsync(WorkspaceId, token);
 

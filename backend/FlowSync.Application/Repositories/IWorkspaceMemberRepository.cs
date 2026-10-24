@@ -2,6 +2,7 @@
 using FlowSync.Application.Models;
 using FlowSync.Contracts.Enums;
 using FlowSync.Contracts.Requests;
+using FlowSync.Contracts.Responses;
 
 namespace FlowSync.Application.Repositories
 {
@@ -11,7 +12,7 @@ namespace FlowSync.Application.Repositories
         Task<bool> ChangeWorkspaceMemberRoleAsync(Guid workspaceId ,Guid memberId, ChangeWorkspaceMemberRoleRequest request, CancellationToken token);
         Task<bool> RemoveWorkspaceMemberAsync(Guid workspaceId, Guid memberId, CancellationToken token);
         Task<bool> LeaveWorkspaceAsync(Guid workspaceId, Guid userId, CancellationToken token);
-        Task<WorkspaceMember?> GetWorkspaceMemberByIdAsync(Guid memberId, CancellationToken token);
+        Task<WorkspaceMemberResponse?> GetWorkspaceMemberByIdAsync(Guid memberId, CancellationToken token);
         Task<WorkspaceRole?> GetWorkspaceMemberRoleAsync(Guid workspaceId, Guid userId, CancellationToken token);
         Task<WorkspaceRole?> GetWorkspaceMemberRoleAsync(Guid memberId, CancellationToken token);
     }

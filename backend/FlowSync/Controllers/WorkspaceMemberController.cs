@@ -42,7 +42,7 @@ namespace FlowSync.Controllers
         {
             var member = await _workspaceMemberService.GetWorkspaceMemberByIdAsync(workspaceId, memberId, token);
 
-            return Ok(new BaseResponse<WorkspaceMember>()
+            return Ok(new BaseResponse<WorkspaceMemberResponse>()
             {
                 Success = true,
                 Message = "Workspace members fetched successfully",

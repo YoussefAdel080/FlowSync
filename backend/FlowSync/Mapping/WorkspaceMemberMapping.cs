@@ -27,6 +27,7 @@ namespace FlowSync.Mapping
                 {
                     Id = invitation.InvitedById,
                     DisplayName = invitation.InvitedBy.DisplayName,
+                    // need to be changed to display owner/admin member role
                     Role = (WorkspaceRole)invitation.Role,
                     Email = invitation.InvitedBy.Email
                 };
