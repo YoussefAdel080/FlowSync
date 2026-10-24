@@ -96,7 +96,8 @@ namespace FlowSync.Application.Repositories
                 Items = members,
                 TotalCount = totalCount,
                 PageNumber = request.PageNumber,
-                PageSize = request.PageSize
+                PageSize = request.PageSize,
+                TotalPages = (int) (double)(totalCount + request.PageSize - 1) / request.PageSize
             };
 
         }

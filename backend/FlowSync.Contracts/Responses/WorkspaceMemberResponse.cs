@@ -16,9 +16,9 @@ namespace FlowSync.Contracts.Responses
 
     public class InvitedByResponse
     {
-        public Guid? Id { get; set; }
-        public string? DisplayName { get; set; }
-        public string? Email { get; set; }
-        public WorkspaceRole? Role { get; set; }
+        public Guid Id { get; set; }
+        public string DisplayName { get; set; }
+        public string Email { get; set; }
+        public WorkspaceRole Role { get; set; }
     }
 }

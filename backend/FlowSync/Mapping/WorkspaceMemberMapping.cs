@@ -8,23 +8,31 @@ namespace FlowSync.Mapping
     {
         public static WorkspaceMemberResponse MapToWorkspaceMemberResponse(this WorkspaceMember member)
         {
-            return new WorkspaceMemberResponse()
-            {
-                Id = member.Id,
-                UserId = member.UserId,
-                DisplayName = member.User.DisplayName,
-                Email = member.User.Email,
-                Role = member.Role,
-                JoinedAt = member.JoinedAt,
-                InvitationId = member.WorkspaceInvitationId,
-                InvitedBy = new InvitedByResponse()
+            var workspaceMemberResponse = 
+                new WorkspaceMemberResponse()
                 {
-                    Id = member?.WorkspaceInvitation?.InvitedById,
-                    DisplayName = member?.WorkspaceInvitation?.InvitedBy.DisplayName,
-                    Role = (WorkspaceRole) member?.WorkspaceInvitation?.Role,
-                    Email = member?.WorkspaceInvitation?.InvitedBy.Email,
-                },
-            };
+                    Id = member.Id,
+                    UserId = member.UserId,
+                    DisplayName = member.User.DisplayName,
+                    Email = member.User.Email,
+                    Role = member.Role,
+                    JoinedAt = member.JoinedAt,
+                    InvitationId = member.WorkspaceInvitationId
+                };
+
+            var invitation = member.WorkspaceInvitation;
+            if (invitation != null)
+            {
+                workspaceMemberResponse.InvitedBy = new InvitedByResponse()
+                {
+                    Id = invitation.InvitedById,
+                    DisplayName = invitation.InvitedBy.DisplayName,
+                    Role = (WorkspaceRole)invitation.Role,
+                    Email = invitation.InvitedBy.Email
+                };
+            }
+
+            return workspaceMemberResponse;
         }
 
         public static List<WorkspaceMemberResponse> MapToWorkspaceMembersResponse(this List<WorkspaceMember> members)
