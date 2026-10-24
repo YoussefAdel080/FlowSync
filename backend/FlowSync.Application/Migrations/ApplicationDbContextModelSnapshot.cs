@@ -300,8 +300,8 @@ namespace FlowSync.Application.Migrations
 
             modelBuilder.Entity("FlowSync.Application.Models.WorkspaceInvitation", b =>
                 {
-                    b.HasOne("FlowSync.Application.Models.User", "InvitedBy")
-                        .WithMany("WorkspaceInvitations")
+                    b.HasOne("FlowSync.Application.Models.WorkspaceMember", "InvitedBy")
+                        .WithMany("SentWorkspaceInvitations")
                         .HasForeignKey("InvitedById")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -345,8 +345,6 @@ namespace FlowSync.Application.Migrations
 
             modelBuilder.Entity("FlowSync.Application.Models.User", b =>
                 {
-                    b.Navigation("WorkspaceInvitations");
-
                     b.Navigation("WorkspaceMemberships");
                 });
 
@@ -355,6 +353,11 @@ namespace FlowSync.Application.Migrations
                     b.Navigation("Invitations");
 
                     b.Navigation("Members");
+                });
+
+            modelBuilder.Entity("FlowSync.Application.Models.WorkspaceMember", b =>
+                {
+                    b.Navigation("SentWorkspaceInvitations");
                 });
 #pragma warning restore 612, 618
         }

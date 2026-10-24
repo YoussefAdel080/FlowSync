@@ -95,7 +95,7 @@ namespace FlowSync.Application.Contexts
                     .IsRequired();
 
                 entity.HasOne(wi => wi.InvitedBy)
-                    .WithMany(i => i.WorkspaceInvitations)
+                    .WithMany(i => i.SentWorkspaceInvitations)
                     .HasForeignKey(wi => wi.InvitedById)
                     .OnDelete(DeleteBehavior.Restrict);
 

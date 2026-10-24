@@ -147,10 +147,9 @@ namespace FlowSync.Application.Repositories
                     ? new InvitedByResponse
                     {
                         Id = wm.WorkspaceInvitation.InvitedById,
-                        DisplayName = wm.WorkspaceInvitation.InvitedBy.DisplayName,
-                        Email = wm.WorkspaceInvitation.InvitedBy.Email,
-                        // need to be changed to display owner/admin member role
-                        Role = (WorkspaceRole) wm.WorkspaceInvitation.Role
+                        DisplayName = wm.WorkspaceInvitation.InvitedBy.User.DisplayName,
+                        Email = wm.WorkspaceInvitation.InvitedBy.User.Email,
+                        Role = wm.WorkspaceInvitation.InvitedBy.Role
                     } : null,
                     UserId = wm.UserId,
                     DisplayName = wm.User.DisplayName,

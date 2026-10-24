@@ -14,7 +14,7 @@ namespace FlowSync.Application.Models
         public DateTime UpdatedAt { get; set; }
         public DateTime ExpiresAt { get; set; }
         public WorkspaceInvitationStatus Status {get; set;}
-        public User InvitedBy { get; set; } = null!;
+        public WorkspaceMember InvitedBy { get; set; } = null!;
         public Workspace Workspace { get; set; } = null!;
     }
 }

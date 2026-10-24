@@ -11,7 +11,6 @@ namespace FlowSync.Application.Models
         public string Password { get; set; }
         public bool IsEmailVerified { get; set; }
         public ICollection<WorkspaceMember> WorkspaceMemberships { get; set; }
-        public ICollection<WorkspaceInvitation> WorkspaceInvitations { get; set; }
         [NotMapped]
         public string DisplayName => $"{FirstName} {LastName}";
     }

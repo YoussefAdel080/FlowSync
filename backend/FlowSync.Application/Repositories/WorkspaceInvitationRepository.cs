@@ -31,27 +31,25 @@ namespace FlowSync.Application.Repositories
 
         public async Task<bool> CreateWorkspaceInvitationAsync(InviteToWorkspaceRequest request, Guid invitedByUserId, CancellationToken token)
         {
-            var workspace = await _context.Workspaces
-                .FirstOrDefaultAsync(w => w.Id == request.WorkspaceId, token);
+            var senderMembership = await _context.WorkspaceMembers
+                .FirstOrDefaultAsync(u => u.WorkspaceId == request.WorkspaceId && u.UserId == invitedByUserId, token);
 
-            var sender = await _context.Users
-                .FirstOrDefaultAsync(u => u.Id == invitedByUserId, token);
+            if (senderMembership is null) return false;
 
             var invitationToken = Guid.NewGuid().ToString();
 
-            if (workspace is null || sender is null) return false;
 
-            await sendInvitationEmail(request.Email, invitationToken, request.Role, workspace.Name, sender.FirstName, token);
+            await sendInvitationEmail(request.Email, invitationToken, request.Role, senderMembership.Workspace.Name, senderMembership.User.FirstName, token); 
 
             var newInvitation = new WorkspaceInvitation
             {
                 Id = Guid.NewGuid(),
-                WorkspaceId = request.WorkspaceId,
+                WorkspaceId = senderMembership.WorkspaceId,
                 Email = request.Email,
                 Role = request.Role,
                 Token = invitationToken,
                 Status = WorkspaceInvitationStatus.Pending,
-                InvitedById = invitedByUserId,
+                InvitedById = senderMembership.Id,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
                 ExpiresAt = DateTime.UtcNow.AddDays(7), // Set expiration date to 7 days from now
@@ -165,17 +163,17 @@ namespace FlowSync.Application.Repositories
                         Owner = new WorkspaceOwnerResponse
                         {
                             Id = wi.InvitedById,
-                            DisplayName = wi.InvitedBy.DisplayName,
-                            Email = wi.InvitedBy.Email
+                            DisplayName = wi.InvitedBy.User.DisplayName,
+                            Email = wi.InvitedBy.User.Email
                         }
                     },
                     InvitedById = wi.InvitedById,
                     InvitedBy = new InvitedByUserResponse
                     {
-                        FirstName = wi.InvitedBy.FirstName,
-                        LastName = wi.InvitedBy.LastName,
-                        Email = wi.InvitedBy.Email,
-                        Role = wi.InvitedBy.WorkspaceMemberships.FirstOrDefault(wm => wm.UserId == wi.InvitedById && wm.WorkspaceId == wi.WorkspaceId)!.Role
+                        FirstName = wi.InvitedBy.User.FirstName,
+                        LastName = wi.InvitedBy.User.LastName,
+                        Email = wi.InvitedBy.User.Email,
+                        Role = wi.InvitedBy.User.WorkspaceMemberships.FirstOrDefault(wm => wm.UserId == wi.InvitedById && wm.WorkspaceId == wi.WorkspaceId)!.Role
                     }
                 })
                 .ToListAsync(token);

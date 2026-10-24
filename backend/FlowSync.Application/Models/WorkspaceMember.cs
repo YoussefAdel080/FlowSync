@@ -11,6 +11,7 @@ namespace FlowSync.Application.Models
         public DateTime JoinedAt { get; set; }
         public Guid? WorkspaceInvitationId { get; set; }
         public WorkspaceInvitation? WorkspaceInvitation { get; set; } = null!;
+        public ICollection<WorkspaceInvitation> SentWorkspaceInvitations { get; set; }
         public User User { get; set; } = null!;
         public Workspace Workspace { get; set; } = null!;
     }
