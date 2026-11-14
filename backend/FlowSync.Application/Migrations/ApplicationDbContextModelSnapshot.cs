@@ -150,6 +150,114 @@ namespace FlowSync.Application.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("FlowSync.Application.Models.Workspace", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NormalizedName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Workspaces");
+                });
+
+            modelBuilder.Entity("FlowSync.Application.Models.WorkspaceInvitation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("InvitedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("WorkspaceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InvitedById");
+
+                    b.HasIndex("Token")
+                        .IsUnique();
+
+                    b.HasIndex("WorkspaceId");
+
+                    b.ToTable("WorkspaceInvitations");
+                });
+
+            modelBuilder.Entity("FlowSync.Application.Models.WorkspaceMember", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("JoinedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("WorkspaceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("WorkspaceInvitationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("WorkspaceInvitationId")
+                        .IsUnique()
+                        .HasFilter("[WorkspaceInvitationId] IS NOT NULL");
+
+                    b.HasIndex("WorkspaceId", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("WorkspaceMembers");
+                });
+
             modelBuilder.Entity("FlowSync.Application.Models.EmailVerification", b =>
                 {
                     b.HasOne("FlowSync.Application.Models.User", "User")
@@ -188,6 +296,68 @@ namespace FlowSync.Application.Migrations
                     b.Navigation("ReplacedByToken");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("FlowSync.Application.Models.WorkspaceInvitation", b =>
+                {
+                    b.HasOne("FlowSync.Application.Models.WorkspaceMember", "InvitedBy")
+                        .WithMany("SentWorkspaceInvitations")
+                        .HasForeignKey("InvitedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("FlowSync.Application.Models.Workspace", "Workspace")
+                        .WithMany("Invitations")
+                        .HasForeignKey("WorkspaceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("InvitedBy");
+
+                    b.Navigation("Workspace");
+                });
+
+            modelBuilder.Entity("FlowSync.Application.Models.WorkspaceMember", b =>
+                {
+                    b.HasOne("FlowSync.Application.Models.User", "User")
+                        .WithMany("WorkspaceMemberships")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FlowSync.Application.Models.Workspace", "Workspace")
+                        .WithMany("Members")
+                        .HasForeignKey("WorkspaceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FlowSync.Application.Models.WorkspaceInvitation", "WorkspaceInvitation")
+                        .WithOne()
+                        .HasForeignKey("FlowSync.Application.Models.WorkspaceMember", "WorkspaceInvitationId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("User");
+
+                    b.Navigation("Workspace");
+
+                    b.Navigation("WorkspaceInvitation");
+                });
+
+            modelBuilder.Entity("FlowSync.Application.Models.User", b =>
+                {
+                    b.Navigation("WorkspaceMemberships");
+                });
+
+            modelBuilder.Entity("FlowSync.Application.Models.Workspace", b =>
+                {
+                    b.Navigation("Invitations");
+
+                    b.Navigation("Members");
+                });
+
+            modelBuilder.Entity("FlowSync.Application.Models.WorkspaceMember", b =>
+                {
+                    b.Navigation("SentWorkspaceInvitations");
                 });
 #pragma warning restore 612, 618
         }

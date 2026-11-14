@@ -33,16 +33,12 @@ namespace FlowSync.Application.Services
         {
             var otp = GenerateVerificationOtp();
 
+            await SendEmail(email, otp, token);
+
             await _emailVerificationRepository.InvalidateActiveVerificationsAsync(userId, token);
             var result = await _emailVerificationRepository.AddEmailVerificationAsync(userId, otp, token);
 
-            if (result)
-            {
-                await SendEmail(email, otp, token);
-                return true;
-            }
-
-            return false;
+            return true;
         }
 
         private async Task SendEmail(string email, string otp, CancellationToken token)

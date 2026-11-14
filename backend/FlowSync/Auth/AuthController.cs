@@ -26,11 +26,11 @@ namespace FlowSync.Controllers
 
             var result = await _authService.Register(user, token);
 
-            var response = new BaseResponse<User>
+            var response = new BaseResponse<bool>
             {
                 Success = true,
-                Message = "User Registered Successfully.",
-                Data = user
+                Message = "Registration successful. A verification email has been sent to your email address. Please verify your email to activate your account.",
+                Data = true
             };
             return Ok(response);
         }

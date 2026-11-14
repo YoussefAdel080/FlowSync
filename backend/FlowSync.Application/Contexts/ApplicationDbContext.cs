@@ -13,14 +13,20 @@ namespace FlowSync.Application.Contexts
         public DbSet<EmailVerification> EmailVerifications { get; set; }
         public DbSet<PasswordReset> PasswordResets { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<Workspace> Workspaces { get; set; }
+        public DbSet<WorkspaceMember> WorkspaceMembers { get; set; }
+        public DbSet<WorkspaceInvitation> WorkspaceInvitations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.Entity<RefreshToken>(entity =>
             {
                 entity.HasKey(rt => rt.Id);
 
-                entity.HasIndex(rt => rt.Token).IsUnique();
+                entity.HasIndex(rt => rt.Token)
+                    .IsUnique();
 
                 entity.HasOne(rt => rt.User)
                     .WithMany()
@@ -31,6 +37,73 @@ namespace FlowSync.Application.Contexts
                     .WithMany()
                     .HasForeignKey(rt => rt.ReplacedByTokenId)
                     .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<Workspace>(entity =>
+            {
+                entity.HasKey(w => w.Id);
+
+                entity.HasMany(w => w.Members)
+                    .WithOne(wm => wm.Workspace)
+                    .HasForeignKey(wm => wm.WorkspaceId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<WorkspaceMember>(entity =>
+            {
+                entity.HasKey(wm => wm.Id);
+
+                entity.HasIndex(wm => new { wm.WorkspaceId, wm.UserId })
+                    .IsUnique();
+
+                entity.Property(wm => wm.Role)
+                    .HasConversion<int>();
+
+                entity.Property(wm => wm.JoinedAt)
+                    .IsRequired();
+
+                entity.HasOne(wm => wm.User)
+                    .WithMany(u => u.WorkspaceMemberships)
+                    .HasForeignKey(wm => wm.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(wm => wm.Workspace)
+                    .WithMany(w => w.Members)
+                    .HasForeignKey(wm => wm.WorkspaceId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(wm => wm.WorkspaceInvitation)
+                    .WithOne()
+                    .HasForeignKey<WorkspaceMember>(wm => wm.WorkspaceInvitationId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<WorkspaceInvitation>(entity =>
+            {
+                entity.HasKey(wi => wi.Id);
+
+                entity.HasIndex(wi => wi.Token)
+                    .IsUnique();
+
+                entity.Property(wi => wi.Role)
+                    .HasConversion<int>();
+
+                entity.Property(wi => wi.Email)
+                    .IsRequired();
+
+                entity.Property(wi => wi.Token)
+                    .IsRequired();
+
+                entity.HasOne(wi => wi.InvitedBy)
+                    .WithMany(i => i.SentWorkspaceInvitations)
+                    .HasForeignKey(wi => wi.InvitedById)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+
+                entity.HasOne(wi => wi.Workspace)
+                    .WithMany(w => w.Invitations)
+                    .HasForeignKey(wi => wi.WorkspaceId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

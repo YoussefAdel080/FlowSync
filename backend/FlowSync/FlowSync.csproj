@@ -22,8 +22,4 @@
     <ProjectReference Include="..\FlowSync.Contracts\FlowSync.Contracts.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
 </Project>

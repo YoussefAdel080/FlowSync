@@ -1,6 +1,6 @@
 using FlowSync.Application;
 using FlowSync.Application.Configuration;
-using FlowSync.Mapping;
+using FlowSync.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -107,7 +107,7 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
-app.UseMiddleware<ValidationMappingMiddleware>();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.MapControllers();
 
